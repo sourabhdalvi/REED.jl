@@ -1,17 +1,11 @@
 using JuMP
-using Ipopt
-using GLPK
+using Gurobi
 using CSV
-using DataFramesMeta
-using JSON
-using BenchmarkTools
-
-
-; ./gdx2csv.sh
+#; ./gdx2csv.sh
 include("./func_def.jl")
 include("./read_data.jl")
 
-model = Model();
+model = Model(solver=GurobiSolver());
 constraints = Dict{String, JuMP.Containers.DenseAxisArray}();
 variables = Dict{String, JuMP.Containers.DenseAxisArray}();
 

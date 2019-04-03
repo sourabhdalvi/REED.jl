@@ -1,7 +1,7 @@
 #!/bin/bash
 
-export PATH=$PATH:"/Applications/GAMS26.1/GAMS Terminal.app/../sysdir" && cd ~
-cd Documents/Projects/R2_SIIP/GDX_data/
+#export PATH=$PATH:"/Applications/GAMS26.1/GAMS Terminal.app/../sysdir" && cd ~
+cd ~/Projects/GDX_data/
 # Dump Sets
 gdxdump ercot_data_20190401.gdx symb=c format=csv noHeader >> Set_C.csv
 gdxdump ercot_data_20190401.gdx symb=t format=csv noHeader >> Set_t.csv

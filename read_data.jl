@@ -70,23 +70,10 @@ set_r_country = read_set("../GDX_data/Set_r_country.csv");
 set_rscfeas = read_set_4D("../GDX_data/Set_rscfeas.csv");
 set_vc = read_set("../GDX_data/Set_vc.csv");
 set_tranfeas = read_set_2D("../GDX_data/Param_tranfeas.csv");
-set_retiretech = Set([(i,c,r,t) for i in set_i, c in set_c, r in set_r, t in set_t 
-            if  in(i,Set(["CoalOldScr","CoalOldUns","Gas-GG","Gas-CT"])) &  in(c,set_initc) & !in(i,set_ban_i)]);
+set_RGGI_r =  read_set("../GDX_data/Param_RGGI_r.csv");
+set_RecTech = read_set_4D("../GDX_data/Param_RecTech.csv");
+set_RecMap = read_set_5D("../GDX_data/Param_RecMap.csv");
 
-set_inv_cond = Set[(i,c,t,tt) for i in set_i, c in set_newc, t in set_t, tt in set_t  
-                if (!in(i,set_bannew_i) & !in(i,set_ban_i) & (tt <= t) & in((i,c,tt),set_ict) & (t-tt <= param_maxage[i])) # missing Tmodel_new
-                | ((i=="csp-ns") & (tt == 2010) & (t-tt <= param_maxage[i]) & in((i,c,tt),set_ict) )]); # or csp-ns conditions
-
-set_i2 = Set([i for i in set_i if !in(i,set_ban_i)]);
-
-set_rfeas = Set([ r for r in set_r if in(r,set_r_ercot) ]);
-
-set_rfeas_cap = Set([ r for r in set_rfeas, rs in set_rs if (sum([ 1 for rr in set_rfeas if haskey(param_r_rs,"$r"*"_"*"$rs")]) > 0) & !(r=="sk") ]);
-
-set_m_refurb_cond = Set([(i,c,r,t) for i in set_i2, c in set_newc, r in set_r, t in set_t, tt in set_t
-                        if in(i,set_refurbtech) & (tt <= t) & (t-tt > param_maxage[i]) 
-                            & in((i,c,tt),set_ict) 
-                            & in((i,c,r,t),set_valcap) & in((i,c,r,tt),set_valcap) ]);
 
 # Param
 param_exo_cap = collect_4D("../GDX_data/Parm_m_capacity_exog.csv");
@@ -117,13 +104,10 @@ param_prm =collect_2D("../GDX_data/Param_prm.csv");
 param_cf_hyd_szn_adj = collect_3D("../GDX_data/Param_cf_hyd_szn_adj.csv");
 param_trancost = collect_3D("../GDX_data/Param_cf_hyd_szn_adj.csv");
 param_emit_rate = collect_5D("../GDX_data/Param_emit_rate.csv");
-param_RGGI_r =  collect_1D("../GDX_data/Param_RGGI_r.csv");
 param_AB32Cap = collect_1D("../GDX_data/Param_AB32Cap.csv");
 param_batterymandate = collect_3D("../GDX_data/Param_batterymandate.csv");
 param_emit_rate_limit = collect_3D("../GDX_data/Param_emit_rate_limit.csv");
-param_RecTech = collect_4D("../GDX_data/Param_RecTech.csv");
-param_RecMap = collect_5D("../GDX_data/Param_RecMap.csv");
-param_offshore_cap_req = collect_2D("../GDX_data/Param_offshore_cap_req.csv");
+aram_offshore_cap_req = collect_2D("../GDX_data/Param_offshore_cap_req.csv");
 param_national_rps_frac = collect_1D("../GDX_data/Param_national_rps_frac.csv");
 param_heat_rate = collect_4D("../GDX_data/Param_heat_rate.csv");
 param_gaslimit = collect_4D("../GDX_data/Param_gaslimit.csv");
@@ -163,4 +147,20 @@ param_biosupply = collect_3D("../GDX_data/Param_biosupply.csv");
 param_biopricemult= collect_3D("../GDX_data/Param_biopricemult.csv");
 param_hurdle = collect_2D("../GDX_data/Param_hurdle.csv");
 param_emit_tax = collect_3D("../GDX_data/Param_emit_tax.csv");
-param_acp_price = collect_2D("../GDX_data/Param_acp_price.csv")
+param_acp_price = collect_2D("../GDX_data/Param_acp_price.csv");
+
+set_retiretech = Set([(i,c,r,t) for i in set_i, c in set_c, r in set_r, t in set_t 
+            if  in(i,Set(["CoalOldScr","CoalOldUns","Gas-GG","Gas-CT"])) &  in(c,set_initc) & !in(i,set_ban_i)]);
+set_inv_cond = Set([(i,c,t,tt) for i in set_i, c in set_newc, t in set_t, tt in set_t  
+                if (!in(i,set_bannew_i) & !in(i,set_ban_i) & (tt <= t) & in((i,c,tt),set_ict) & (t-tt <= param_maxage[i])) # missing Tmodel_new
+                | ((i=="csp-ns") & (tt == 2010) & (t-tt <= param_maxage[i]) & in((i,c,tt),set_ict) )]);
+set_i2 = Set([i for i in set_i if !in(i,set_ban_i)]);
+
+set_rfeas = Set([ r for r in set_r if in(r,set_r_ercot) ]);
+
+set_rfeas_cap = Set([ r for r in set_rfeas, rs in set_rs if (sum([ 1 for rr in set_rfeas if haskey(param_r_rs,"$r"*"_"*"$rs")]) > 0) & !(r=="sk") ]);
+
+set_m_refurb_cond = Set([(i,c,r,t) for i in set_i2, c in set_newc, r in set_r, t in set_t, tt in set_t
+                        if in(i,set_refurbtech) & (tt <= t) & (t-tt > param_maxage[i]) 
+                            & in((i,c,tt),set_ict) 
+                            & in((i,c,r,t),set_valcap) & in((i,c,r,tt),set_valcap) ]);

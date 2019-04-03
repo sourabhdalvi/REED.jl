@@ -704,7 +704,7 @@ for t in set_t
         constraints["$(cons_name)"][t] = JuMP.@constraint(model,  
            variables["RGGICap"][t] 
             >=
-            sum([ variables["EMIT"]["CO2",r,t]  for r in set_rfeas if haskey(param_RGGI_r,"$r") ])
+            sum([ variables["EMIT"]["CO2",r,t]  for r in set_rfeas if in(r,set_RGGI_r) ])
         )
     end
 end
@@ -777,9 +777,9 @@ for rps in set_RPSCat, i in set_i, st in set_st, t in set_t
     if (st=="TX") & !(t==set_t[1]) & (t > 2016)
         constraints["$(cons_name)"][t] = JuMP.@constraint(model,
             sum([ param_hours["$h"]*variables["GEN"][i,c,r,h,t] for c in set_c, r in set_rfeas, h in set_h 
-                        if ((i,c,r,t),set_valcap) & haskey(param_RecTech,"$rps"*"_"*"$st"*"_"*"$i"*"_"*"$t") & in((r,st),set_r_st) ])
+                        if ((i,c,r,t),set_valcap) & in((rps,st,i,t),set_RecTech) & in((r,st),set_r_st) ])
             >=
-            sum([ variables["RECS"][rps,i,st,ast,t] for ast in set_st if  haskey(param_RecMap,"$i"*"_"*"$rps"*"_"*"$st"*"_"*"$ast"*"_"*"$t") & (ast=="TX")   ])
+            sum([ variables["RECS"][rps,i,st,ast,t] for ast in set_st if  in((i,rps,st,ast,t)set_RecMap)  & (ast=="TX")   ])
         )
     end
 end
