@@ -149,6 +149,8 @@ param_hurdle = collect_2D("../GDX_data/Param_hurdle.csv");
 param_emit_tax = collect_3D("../GDX_data/Param_emit_tax.csv");
 param_acp_price = collect_2D("../GDX_data/Param_acp_price.csv");
 
+set_t = Set([2010,2012,2014,2016,2018,2020]);
+
 set_retiretech = Set([(i,c,r,t) for i in set_i, c in set_c, r in set_r, t in set_t 
             if  in(i,Set(["CoalOldScr","CoalOldUns","Gas-GG","Gas-CT"])) &  in(c,set_initc) & !in(i,set_ban_i)]);
 set_inv_cond = Set([(i,c,t,tt) for i in set_i, c in set_newc, t in set_t, tt in set_t  

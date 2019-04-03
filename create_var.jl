@@ -35,7 +35,7 @@ end
 
 # Create Variable INV_RSC
 var_name = "INV_RSC"
-variables["$(var_name)"] =  JuMP.Containers.SparseAxisArray{JuMP.variable_type(model)}(undef, set_i2,set_c,set_r,set_t,set_rscbin)
+variables["$(var_name)"] =  JuMP.Containers.DenseAxisArray{JuMP.variable_type(model)}(undef, set_i2,set_c,set_r,set_t,set_rscbin)
 for i in set_i2, c in set_c, r in set_r, t in set_t
     if in(i,set_rsc_i)
         for rscbin in set_rscbin
