@@ -1,11 +1,12 @@
 function read_set(csv_path)
-    set_ = CSV.read(csv_path,header=0).Column1;
+    set_ = DataFrames.disallowmissing!(CSV.read(csv_path,header=0));
+    set_ = set_.Column1
     set_ = Set(set_)
     return set_
 end
 
 function collect_1D(file_path)
-    param = CSV.read(file_path,header=0);
+    param = DataFrames.dropmissing(CSV.read(file_path,header=0), disallowmissing=true);
     pdict = Dict()
     nrow,ncol = size(param)
     for row in 1:nrow
@@ -15,7 +16,7 @@ function collect_1D(file_path)
 end
 
 function collect_2D(file_path)
-    param = CSV.read(file_path,header=0);
+    param = DataFrames.dropmissing(CSV.read(file_path,header=0), disallowmissing=true);
     pdict = Dict()
     nrow,ncol = size(param)
     for row in 1:nrow
@@ -26,7 +27,7 @@ function collect_2D(file_path)
 end
 
 function collect_3D(file_path)
-    param = CSV.read(file_path,header=0);
+    param = DataFrames.dropmissing(CSV.read(file_path,header=0), disallowmissing=true);
     pdict = Dict()
     nrow,ncol = size(param)
     for row in 1:nrow
@@ -37,7 +38,7 @@ function collect_3D(file_path)
 end
 
 function collect_4D(file_path)
-    param = CSV.read(file_path,header=0);
+    param = DataFrames.dropmissing(CSV.read(file_path,header=0), disallowmissing=true);
     pdict = Dict()
     nrow,ncol = size(param)
     if ncol == 5
@@ -52,7 +53,7 @@ function collect_4D(file_path)
 end
 
 function collect_5D(file_path)
-    param = CSV.read(file_path,header=0);
+    param = DataFrames.dropmissing(CSV.read(file_path,header=0), disallowmissing=true);
     pdict = Dict()
     nrow,ncol = size(param)
     for row in 1:nrow
@@ -63,7 +64,7 @@ function collect_5D(file_path)
 end
 
 function read_set_2D(csv_path)
-    set = CSV.read(csv_path,header=0);
+    set = DataFrames.dropmissing(CSV.read(csv_path,header=0), disallowmissing=true);
     slist = []
     nrow,ncol = size(set)
     for row in 1:nrow
@@ -74,7 +75,7 @@ function read_set_2D(csv_path)
 end
 
 function read_set_3D(csv_path)
-    set = CSV.read(csv_path,header=0);
+    set = DataFrames.dropmissing(CSV.read(csv_path,header=0), disallowmissing=true);
     slist = []
     nrow,ncol = size(set)
     for row in 1:nrow
@@ -85,7 +86,7 @@ function read_set_3D(csv_path)
 end
 
 function read_set_4D(csv_path)
-    set = CSV.read(csv_path,header=0);
+    set = DataFrames.dropmissing(CSV.read(csv_path,header=0), disallowmissing=true);
     slist = []
     nrow,ncol = size(set)
     for row in 1:nrow
@@ -96,7 +97,7 @@ function read_set_4D(csv_path)
 end
 
 function read_set_5D(csv_path)
-    set = CSV.read(csv_path,header=0);
+    set = DataFrames.dropmissing(CSV.read(csv_path,header=0), disallowmissing=true);
     slist = []
     nrow,ncol = size(set)
     for row in 1:nrow
