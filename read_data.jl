@@ -120,6 +120,8 @@ param_numdays = collect_1D("../GDX_data/Param_numdays.csv");
 param_storage_eff = collect_1D("../GDX_data/Param_storage_eff.csv");
 param_storage_duration = collect_1D("../GDX_data/Param_storage_duration.csv");
 param_m_rscfeas = collect_3D("../GDX_data/Param_m_rscfeas.csv");
+param_can_exports_h = collect_3D("../GDX_data/Param_can_exports_h.csv");
+param_lmnt = collect_3D("../GDX_data/Param_lmnt.csv");
 
 #Cost
 param_cost_cap_fin_mult = collect_3D("../GDX_data/Param_cost_cap_fin_mult.csv");

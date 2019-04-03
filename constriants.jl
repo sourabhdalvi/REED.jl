@@ -1,3 +1,20 @@
+# *=========================
+# * --- LOAD CONSTRAINT ---
+# *=========================
+cons_name = "eq_loadcon"
+constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef,set_r,set_h,set_t])
+
+for r in set_r, h in set_h, t in set_t
+    constraints["$(cons_name)"][r, h, t] = JuMP.@constraint(model,
+        variables["LOAD"][r, h, t]
+        ==
+        param_can_exports_h["$r"*"_"*"$h"*"_"*"$t"]
+        + param_lmnt["$r"*"_"*"$h"*"_"*"$t"]
+    )
+end
+
+# -----------------------------------------------------------------------
+
 # *====================================
 # * -- existing capacity equations --
 # *====================================

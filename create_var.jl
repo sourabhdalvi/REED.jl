@@ -206,3 +206,10 @@ for r in set_r, vc in set_vc, t in set_t
     variables["$(var_name)"][r,vc,t] = 
         JuMP.@variable(model, base_name="$(var_name)_{$(r), $(vc), $(t)}", start = 0.0, binary=false)
 end
+
+var_name = "LOAD"
+variables["$(var_name)"] =  JuMP.Containers.DenseAxisArray{JuMP.variable_type(model)}(undef, set_r,set_h,set_t)
+for r in set_r, h in set_h, t in set_t
+    variables["$(var_name)"][r,h,t] = 
+        JuMP.@variable(model, base_name="$(var_name)_{$(r), $(h), $(t)}", start = 0.0, binary=false)
+end
