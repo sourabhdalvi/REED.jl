@@ -1,8 +1,6 @@
 function read_set(csv_path)
     set_ = DataFrames.disallowmissing!(CSV.read(csv_path,header=0));
-    set_ = set_.Column1
-    set_ = Set(set_)
-    return set_
+    return collect(Set(set_.Column1))
 end
 
 function collect_1D(file_path)
@@ -71,7 +69,7 @@ function read_set_2D(csv_path)
         i = (set[row,1],set[row,2]);
         push!(slist,i);
     end
-    return Set(slist)
+    return collect(Set(slist))
 end
 
 function read_set_3D(csv_path)
@@ -82,7 +80,7 @@ function read_set_3D(csv_path)
         i = (set[row,1],set[row,2],set[row,3]);
         push!(slist,i);
     end
-    return Set(slist)
+    return collect(Set(slist))
 end
 
 function read_set_4D(csv_path)
@@ -93,7 +91,7 @@ function read_set_4D(csv_path)
         i = (set[row,1],set[row,2],set[row,3],set[row,4]);
         push!(slist,i);
     end
-    return Set(slist)
+    return collect(Set(slist))
 end
 
 function read_set_5D(csv_path)
@@ -104,5 +102,5 @@ function read_set_5D(csv_path)
         i = (set[row,1],set[row,2],set[row,3],set[row,4],set[row,5]);
         push!(slist,i);
     end
-    return Set(slist)
+    return collect(Set(slist))
 end
