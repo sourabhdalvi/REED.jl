@@ -1,37 +1,25 @@
 
-# Create Variable CAP
+# Create Variable CAP,INV
 var_name = "CAP"
-variables["$(var_name)"] =  JuMP.Containers.DenseAxisArray{JuMP.variable_type(model)}(undef, set_i2,set_c,set_r,set_t)
+variables["CAP"] =  JuMP.Containers.DenseAxisArray{JuMP.variable_type(model)}(undef, set_i2,set_c,set_r,set_t)
+variables["INV"] =  JuMP.Containers.DenseAxisArray{JuMP.variable_type(model)}(undef, set_i2,set_c,set_r,set_t)
 for i in set_i2, c in set_c, r in set_r, t in set_t 
-    if in((i,c,r,t),set_valcap)
-        variables["$(var_name)"][i, c, r, t] = 
-            JuMP.@variable(model, base_name="$(var_name)_{$i,$c, $r, $t}", start = 0.0, binary=false)
-    end
-end
-# Create Variable INV
-var_name = "INV"
-variables["$(var_name)"] =  JuMP.Containers.DenseAxisArray{JuMP.variable_type(model)}(undef, set_i2,set_c,set_r,set_t)
-for i in set_i2, c in set_c, r in set_r, t in set_t 
-    variables["$(var_name)"][i, c, r, t] = 
-        JuMP.@variable(model, base_name="$(var_name)_{$i,$c, $r, $t}", start = 0.0, binary=false)
+        variables["CAP"][i, c, r, t] = JuMP.@variable(model, base_name="CAP_{$i,$c, $r, $t}", start = 0.0, binary=false)
+        variables["INV"][i, c, r, t] = JuMP.@variable(model, base_name="INV_{$i,$c, $r, $t}", start = 0.0, binary=false)
 end
 
-# Create Variable INVREFURB
-var_name = "INVREFURB"
-variables["$(var_name)"] =  JuMP.Containers.DenseAxisArray{JuMP.variable_type(model)}(undef,set_i2,set_r,set_t)
+# Create Variable INVREFURB, EXTRA_PRESCRIP
+
+variables["INVREFURB"] =  JuMP.Containers.DenseAxisArray{JuMP.variable_type(model)}(undef,set_i2,set_r,set_t)
+variables["EXTRA_PRESCRIP"] =  JuMP.Containers.DenseAxisArray{JuMP.variable_type(model)}(undef, set_pcat,set_r,set_t)
 for i in set_i2, r in set_r, t in set_t
-    variables["$(var_name)"][i, r, t] = 
-        JuMP.@variable(model, base_name="$(var_name)_{$i, $r, $(t)}", start = 0.0, binary=false)
-end
+    variables["INVREFURB"][i, r, t] = JuMP.@variable(model, base_name="INVREFURB_{$i, $r, $(t)}", start = 0.0, binary=false)
 
-# Create Variable EXTRA_PRESCRIP
-var_name = "EXTRA_PRESCRIP"
-variables["$(var_name)"] =  JuMP.Containers.DenseAxisArray{JuMP.variable_type(model)}(undef, set_pcat,set_r,set_t)
-for i in set_pcat, r in set_r, t in set_t
-    variables["$(var_name)"][i, r, t] = 
-        JuMP.@variable(model, base_name="$(var_name)_{$(i), $(r), $(t)}", start = 0.0, binary=false)
+    if in(i,set_pcat)
+        variables["EXTRA_PRESCRIP"][i, r, t] = JuMP.@variable(model, base_name="EXTRA_PRESCRIP_{$(i), $(r), $(t)}", start = 0.0, binary=false)
+    end
+    
 end
-
 
 # Create Variable INV_RSC
 var_name = "INV_RSC"
@@ -48,13 +36,19 @@ end
 ### Generation and storage variables
 #### Note that in constraints where both GEN and STORAGE_OUT exist, CSP-TES is normally represented as STORAGE_OUT
 
-# Create Variable GEN
+# Create Variable GEN,STORAGE_IN, STORAGE_OUT, STORAGE_LEVEL
 var_name = "GEN"
-variables["$(var_name)"] =  JuMP.Containers.DenseAxisArray{JuMP.variable_type(model)}(undef, set_i2,set_c,set_r,set_h,set_t)
+variables["GEN"] =  JuMP.Containers.DenseAxisArray{JuMP.variable_type(model)}(undef, set_i2,set_c,set_r,set_h,set_t)
+variables["STORAGE_IN"] =  JuMP.Containers.DenseAxisArray{JuMP.variable_type(model)}(undef, set_i2,set_c,set_r,set_h,set_t)
+variables["STORAGE_OUT"] =  JuMP.Containers.DenseAxisArray{JuMP.variable_type(model)}(undef, set_i2,set_c,set_r,set_h,set_t)
+variables["STORAGE_LEVEL"] =  JuMP.Containers.DenseAxisArray{JuMP.variable_type(model)}(undef, set_i2,set_c,set_r,set_h,set_t)
 for i in set_i2, c in set_c, r in set_r, h in set_h, t in set_t
-    variables["$(var_name)"][i, c, r, h, t] = 
-        JuMP.@variable(model, base_name="$(var_name)_{$(i), $(c), $(r), $(h), $(t)}", start = 0.0, binary=false)
+    variables["GEN"][i, c, r, h, t] = JuMP.@variable(model, base_name="GEN_{$(i), $(c), $(r), $(h), $(t)}", start = 0.0, binary=false)
+    variables["STORAGE_IN"][i, c, r, h, t] = JuMP.@variable(model, base_name="STORAGE_IN_{$(i), $(c), $(r), $(h), $(t)}", start = 0.0, binary=false)
+    variables["STORAGE_OUT"][i, c, r, h, t] = JuMP.@variable(model, base_name="STORAGE_OUT_{$(i), $(c), $(r), $(h), $(t)}", start = 0.0, binary=false)
+    variables["STORAGE_LEVEL"][i, c, r, h, t] = JuMP.@variable(model, base_name="STORAGE_LEVEL_{$(i), $(c), $(r), $(h), $(t)}", start = 0.0, binary=false)
 end
+
 
 # Create Variable CURT
 var_name = "CURT"
@@ -70,30 +64,6 @@ variables["$(var_name)"] =  JuMP.Containers.DenseAxisArray{JuMP.variable_type(mo
 for r in set_r, szn in set_szn, t in set_t
     variables["$(var_name)"][r, szn, t] = 
         JuMP.@variable(model, base_name="$(var_name)_{$(r), $(szn), $(t)}", start = 0.0, binary=false)
-end
-
-# Create Variable STORAGE_IN
-var_name = "STORAGE_IN"
-variables["$(var_name)"] =  JuMP.Containers.DenseAxisArray{JuMP.variable_type(model)}(undef, set_i2,set_c,set_r,set_h,set_t)
-for i in set_i2, c in set_c, r in set_r, h in set_h, t in set_t
-    variables["$(var_name)"][i, c, r, h, t] = 
-        JuMP.@variable(model, base_name="$(var_name)_{$(i), $(c), $(r), $(h), $(t)}", start = 0.0, binary=false)
-end
-
-# Create Variable STORAGE_OUT
-var_name = "STORAGE_OUT"
-variables["$(var_name)"] =  JuMP.Containers.DenseAxisArray{JuMP.variable_type(model)}(undef, set_i2,set_c,set_r,set_h,set_t)
-for i in set_i2, c in set_c, r in set_r, h in set_h, t in set_t
-    variables["$(var_name)"][i, c, r, h, t] = 
-        JuMP.@variable(model, base_name="$(var_name)_{$(i), $(c), $(r), $(h), $(t)}", start = 0.0, binary=false)
-end
-
-# Create Variable STORAGE_LEVEL
-var_name = "STORAGE_LEVEL"
-variables["$(var_name)"] =  JuMP.Containers.DenseAxisArray{JuMP.variable_type(model)}(undef, set_i2,set_c,set_r,set_h,set_t)
-for i in set_i2, c in set_c, r in set_r, h in set_h, t in set_t
-    variables["$(var_name)"][i, c, r, h, t] = 
-        JuMP.@variable(model, base_name="$(var_name)_{$(i), $(c), $(r), $(h), $(t)}", start = 0.0, binary=false)
 end
 
 ### Trade variables

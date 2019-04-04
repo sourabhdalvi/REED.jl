@@ -20,10 +20,7 @@ end
 # *====================================
 
 cons_name = "eq_cap_init_noret"
-constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, [i for i in set_i2], 
-                                                                                        [c for c in set_c], 
-                                                                                        [r for r in set_r], 
-                                                                                        [t for t in set_t])
+constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, set_i2,set_c,set_r,set_t)
 # eq_cap_init_noret
 for i in set_i2, c in set_c, r in set_r, t in set_t
     if in(c,set_initc) & (t in set_yeart) & (t <= set_retireyear[1]) &  in((i,c,r,t),set_valcap) # t in set_tmodel, 
@@ -37,10 +34,7 @@ end
 # -----------------------------------------------------------------------
 
 cons_name = "eq_cap_init_retub"
-constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, [i for i in set_i2], 
-                                                                                        [c for c in set_c], 
-                                                                                        [r for r in set_r], 
-                                                                                        [t for t in set_t])
+constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, set_i2,set_c,set_r,set_t)
 # eq_cap_init_retub
 for i in set_i2, c in set_c, r in set_r, t in set_t
     if in(c,set_initc) & (t in set_yeart) & (t >= set_retireyear[1]) & in((i,c,r,t),set_retiretech) & in((i,c,r,t),set_valcap)# t in set_tmodel
@@ -54,10 +48,7 @@ end
 # -----------------------------------------------------------------------
 
 cons_name = "eq_cap_init_retmo"
-constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, [i for i in set_i2], 
-                                                                                        [c for c in set_c], 
-                                                                                        [r for r in set_r], 
-                                                                                        [t for t in set_t])
+constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, set_i2,set_c,set_r,set_t)
 # eq_cap_init_retmo
 for i in set_i2, c in set_c, r in set_r, t in set_t
     if in(c,set_initc) & in(t,set_yeart) & (t >= set_retireyear[1]) & in((i,c,r,t),set_retiretech) & in((i,c,r,t),set_valcap)
@@ -74,10 +65,7 @@ end
 # *==============================
 
 cons_name = "eq_cap_new_noret"
-constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, [i for i in set_i2], 
-                                                                                        [c for c in set_c], 
-                                                                                        [r for r in set_r], 
-                                                                                        [t for t in set_t])
+constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, set_i2,set_c,set_r,set_t)
 
 # eq_cap_new_noret
 for i in set_i2, c in set_c, r in set_r, t in set_t
@@ -99,10 +87,7 @@ end
 
 # eq_cap_new_retub
 cons_name = "eq_cap_new_retub"
-constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, [i for i in set_i2], 
-                                                                                        [c for c in set_c], 
-                                                                                        [r for r in set_r], 
-                                                                                        [t for t in set_t])
+constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, set_i2,set_c,set_r,set_t)
 for i in set_i2, c in set_c, r in set_r, t in set_t
     if (t >= set_retireyear[1]) & in(c,set_initc) &  in((i,c,r,t),set_retiretech) & in((i,c,r,t),set_valcap)
         constraints["$(cons_name)"][i,c,r,t] = JuMP.@constraint(model, 
@@ -123,10 +108,7 @@ end
 
 # eq_cap_new_retmo
 cons_name = "eq_cap_new_retmo"
-constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, [i for i in set_i2], 
-                                                                                        [c for c in set_c], 
-                                                                                        [r for r in set_r], 
-                                                                                        [t for t in set_t])
+constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, set_i2,set_c,set_r,set_t)
 for i in set_i2, c in set_c, r in set_r, t in set_t
     if (t >= set_retireyear[1]) & in(c,set_initc) & in(t-1,set_yeart) & in((i,c,r,t),set_retiretech) & in((i,c,r,t),set_valcap)
         constraints["$(cons_name)"][i,c,r,t] = 
@@ -148,9 +130,7 @@ end
 
 # eq_forceprescription
 cons_name = "eq_forceprescription"
-constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, [i for i in set_pcat], 
-                                                                                        [r for r in set_r], 
-                                                                                        [t for t in set_t])
+constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, set_pcat,set_r,set_t)
 
 
 
@@ -179,8 +159,7 @@ end
 
 # eq_neartermcaplimit
 cons_name = "eq_neartermcaplimit"
-constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, [r for r in set_r], 
-                                                                                        [t for t in set_t])
+constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, set_r,set_t)
 for t in set_t, r in set_r 
     if in(r,set_rfeas_cap) & (sum([1 for rr in set_r if haskey(param_near_term_cap_limits,"Wind"*"_"*"$r"*"_"*"$t")]) > 0 ) 
         & (sum([ 1 for i in set_i2, c in set_c if in((i,c,r,t),set_valcap) &  in(("Wind",i), set_tg_i)]) > 0) # $SwM_NearTermLimits
@@ -197,9 +176,7 @@ end
 
 #eq_refurblim
 cons_name = "eq_refurblim"
-constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, [i for i in set_i2],
-                                                                                        [r for r in set_r], 
-                                                                                        [t for t in set_t])
+constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, set_i2,set_r,set_t)
 
 
 for i in set_i2,  r in set_r,  t in set_t
@@ -222,10 +199,7 @@ end
 
 # eq_rsc_inv_account 
 cons_name = "eq_rsc_inv_account"
-constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, [i for i in set_i2] ,
-                                                                                        [c for c in set_newc], 
-                                                                                        [r for r in set_r], 
-                                                                                        [t for t in set_t])
+constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, set_i2,set_newc,set_r,set_t)
 for i in set_i2, c in set_newc, r in set_r, t in set_t
     if in(i,set_rsc_i) & in((i,c,r,t),set_valcap)  
        constraints["$(cons_name)"][i, c, r, t] = JuMP.@constraint(model,
@@ -241,9 +215,7 @@ end
 
 # eq_rsc_INVlim
 cons_name = "eq_rsc_INVlim"
-constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, [i for i in set_i2] ,
-                                                                                        [r for r in set_rfeas_cap], 
-                                                                                        [rscbin for rscbin in set_rscbin])
+constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, set_i2,set_rfeas_cap,set_rscbin)
 for i in set_i2, r in set_rfeas_cap, rscbin in set_rscbin
     if in(i,set_rsc_i) & haskey(param_m_rscfeas,"$r"*"_"*"$i"*"_"*"$rscbin")
         constraints["$(cons_name)"][i, c, r, t] = JuMP.@constraint(model,
@@ -259,8 +231,7 @@ end
 
 # eq_growthlimit_relative
 cons_name = "eq_growthlimit_relative"
-constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef,[tg for tg in set_tg] ,
-                                                                                        [t for t in set_t])
+constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef,set_tg,set_t)
 
 for tg in set_tg, t in set_t
     if (t >= 2020) & !(t==set_t[end]) & param_growth_limit_relative[tg] &
@@ -276,8 +247,7 @@ end
 # -----------------------------------------------------------------------
 
 cons_name = "eq_growthlimit_absolute"
-constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, [t for t in set_t] ,
-                                                                                        [tg for tg in set_tg])
+constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, set_t,set_tg)
 
 for t in set_t, tg in set_tg
     if (t >= 2018) & !(t==set_t[end]) & haskey(param_growth_limit_relative,tg)
@@ -294,11 +264,7 @@ end
 
 # eq_capacity_limit
 cons_name = "eq_capacity_limit"
-constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, [i for i in set_i2],
-                                                                                        [c for c in set_c], 
-                                                                                        [r for r in set_r],
-                                                                                        [h for h in set_h],
-                                                                                        [t for t in set_t],
+constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, set_i2,set_c,set_r,set_h,set_t,
                                                                                         )
 for i in set_i2, c in set_c, r in set_r, h in set_h, t in set_t
     if in(r,set_rfeas_cap) & in((i,c,r,t),set_valcap) & !(in(i,set_storage)) & !(in(i,set_hydro_d)) 
@@ -320,9 +286,7 @@ end
 
 # eq_curt_gen_balance
 cons_name = "eq_curt_gen_balance"
-constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, [r for r in set_rfeas_cap],
-                                                                                        [h for h in set_h],
-                                                                                        [t for t in set_t])
+constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, set_rfeas_cap,set_h,set_t)
 for r in set_rfeas_cap , h in set_h, t in set_t
     constraints["$(cons_name)"][r, h, t] = JuMP.@constraint(model,
         
@@ -339,9 +303,7 @@ end
 # -----------------------------------------------------------------------
 
 cons_name = "eq_curtailment"
-constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, [r for r in set_r],
-                                                                                        [h for h in set_h],
-                                                                                        [t for t in set_t])
+constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, set_r,set_h,set_t)
 for t in set_t, r in set_rfeas_cap , h in set_h
 
     constraints["$(cons_name)"][r, h, t] = JuMP.@constraint(model,
@@ -363,10 +325,7 @@ end
 # -----------------------------------------------------------------------
 
 cons_name = "eq_mingen_lb"
-constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef,[r for r in set_rfeas_cap],
-                                                                                        [h for h in set_h],
-                                                                                        [szn for szn in set_szn],
-                                                                                        [t for t in set_t])
+constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, set_rfeas_cap,set_h,set_szn,set_t)
 for r in set_rfeas_cap, h in set_h, szn in set_szn, t in set_t
     if ((h,szn) in set_h_szn)
         constraints["$(cons_name)"][r,h,szn,t] = JuMP.@constraint(model,
@@ -382,10 +341,7 @@ end
 # -----------------------------------------------------------------------
 
 cons_name = "eq_mingen_ub"
-constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef,[r for r in set_rfeas_cap],
-                                                                                        [h for h in set_h],
-                                                                                        [szn for szn in set_szn],
-                                                                                        [t for t in set_t])
+constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, set_rfeas_cap,set_h,set_szn,set_t)
 
 for r in set_rfeas_cap, h in set_h, szn in set_szn, t in set_t
     if ((h,szn) in set_h_szn)
@@ -402,10 +358,7 @@ end
 # -----------------------------------------------------------------------
 
 cons_name = "eq_gasct_gencon"
-constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, [i for i in set_i2] ,
-                                                                                        [c for c in set_c], 
-                                                                                        [r for r in set_rfeas_cap], 
-                                                                                        [t for t in set_t])
+constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, set_i2,set_c,set_rfeas_cap,set_t)
 for i in set_i2, c in set_c, r in set_rfeas_cap, t in set_t
     if (i == "gas-ct" |i == "gas-ct-nsp") & in((i,c,rr,t),set_valcap)  #$SwM_GasCTGenCon
         constraints["$(cons_name)"][i,c,r,t] = JuMP.@constraint(model,
@@ -421,11 +374,7 @@ end
 # -----------------------------------------------------------------------
 
 cons_name = "eq_dhyd_dispatch"
-constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, [i for i in set_i2] ,
-                                                                                        [c for c in set_c], 
-                                                                                        [r for r in set_rfeas_cap], 
-                                                                                        [szn for szn in set_szn],
-                                                                                        [t for t in set_t])
+constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, set_i2,set_c,set_rfeas_cap,set_szn,set_t)
 for i in set_i2, c in set_c, r in set_rfeas_cap, h in set_h, szn in set_szn, t in set_t
     if in((i,c,rr,t),set_valcap) & in(i,set_hydro_d) 
          constraints["$(cons_name)"][i,c,r,szn,t] = JuMP.@constraint(model,
@@ -443,9 +392,7 @@ end
 # *===============================
 
 cons_name = "eq_supply_demand_balance"
-constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, [r for r in set_rfeas_cap], 
-                                                                                        [h for h in set_h],
-                                                                                        [t for t in set_t])
+constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, set_rfeas_cap,set_h,set_t)
 
 for r in set_rfeas_cap, h in set_h, t in set_t 
      constraints["$(cons_name)"][r,h,t] = JuMP.@constraint(model,
@@ -469,12 +416,7 @@ end
 # * --- MINIMUM LOADING CONSTRAINTS ---
 # *=======================================
 cons_name = "eq_minloading"
-constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, [i for i in set_i2] ,
-                                                                                        [c for c in set_c], 
-                                                                                        [r for r in set_rfeas_cap], 
-                                                                                        [h for h in set_h],
-                                                                                        [hh for hh in set_h],
-                                                                                        [t for t in set_t])
+constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, set_i2,set_c,set_rfeas_cap,set_h,set_h,set_t)
 for i in set_i2, c in set_c, r in set_rfeas_cap, h in set_h, hh in set_h, t in set_t 
     if haskey(param_minloadfrac,"$r"*"_"*"$i"*"_"*"$h") & in((i,c,rr,t),set_valcap)  & in((h,hh),set_hour_szn_group) 
         constraints["$(cons_name)"][i,c,r,h,hh,t] = JuMP.@constraint(model,
@@ -490,12 +432,7 @@ end
 # * --- OPERATING RESERVE CONSTRAINTS ---
 # *=======================================
 cons_name = "eq_ORCap"
-constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, [or for or in set_ortype],
-                                                                                        [i for i in set_i2] ,
-                                                                                        [c for c in set_c], 
-                                                                                        [r for r in set_rfeas_cap], 
-                                                                                        [h for h in set_h],
-                                                                                        [t for t in set_t])
+constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, set_ortype,set_i2,set_c,set_rfeas_cap,set_h,set_t)
 
 for or in ortype, i in set_i2, c in set_c, r in set_rfeas_cap, h in set_h, hh in set_h, t in set_t 
     if haskey(param_reserve_frac,"$i"*"_"*"$or") & !in(i,set_storage) & in((i,c,rr,t),set_valcap) & !in(i,set_hydro_d) #$SwM_OpRes
@@ -511,10 +448,7 @@ end
 # -----------------------------------------------------------------------
 
 cons_name = "eq_OpRes_requirement"
-constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, [or for or in set_ortype],
-                                                                                        [r for r in set_rfeas_cap], 
-                                                                                        [h for h in set_h],
-                                                                                        [t for t in set_t])
+constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, set_ortype,set_rfeas_cap,set_h,set_t])
 
 for or in ortype, r in set_rfeas_cap, h in set_h, hh in set_h, t in set_t 
     constraints["$(cons_name)"][or,r,h,t] = JuMP.@constraint(model,
@@ -534,9 +468,7 @@ end
 # -----------------------------------------------------------------------
 
 cons_name = "eq_inertia_requirement"
-constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef,[rto for rto in set_rto],
-                                                                                        [h for h in set_h],
-                                                                                        [t for t in set_t])
+constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, set_rto,set_h,set_t)
 
 for rto in set_rto, h in set_h, t in set_t 
     if (sum([ 1 for r in set_rfeas_cap if in((r,rto),set_r_rto)]) > 0) # SwM_Inertia
@@ -563,10 +495,7 @@ end
 # * --- PLANNING RESERVE MARGIN ---
 # *=================================
 cons_name = "eq_PRMTRADELimit"
-constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef,[r for r in set_rfeas_cap],
-                                                                                        [rr for rr in set_rfeas_cap],
-                                                                                        [szn for szn in set_szn],
-                                                                                        [t for t in set_t])
+constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, set_rfeas_cap,set_rfeas_cap,set_szn,set_t)
 for r in set_rfeas_cap, rr in set_rfeas_cap, szn in set_szn, t in set_t
     if (sum([ 1 for tr in set_trtype if in((r,rr,trtypes),set_routes)]) > 0) # SwM_ReserveMargin
         constraints["$(cons_name)"][or,r,h,t] = JuMP.@constraint(model,
