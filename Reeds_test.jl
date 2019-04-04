@@ -5,11 +5,11 @@ using CSV
 include("./func_def.jl")
 include("./read_data.jl")
 
-model = Model(solver=GurobiSolver());
+model = Model(with_optimizer(Gurobi.Optimizer));
 constraints = Dict{String, JuMP.Containers.DenseAxisArray}();
 variables = Dict{String, JuMP.Containers.DenseAxisArray}();
 
-include("./variables.jl")
+include("./create_var.jl")
 include("./constraint.jl")
 include("./Objective.jl")
 
