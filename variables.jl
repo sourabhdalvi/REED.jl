@@ -1,20 +1,20 @@
 function concat_sets(axs...)
         str_set = [join(collect(tup),"_") for tup in vec(collect(Base.product(axs...)))];
         return str_set
-    end
+end
     
-    function var_const(m,var_name,names)
-        size = length(names); 
-        var = MOI.add_variables(JuMP.backend(m),size);
-        for (nam,v) in zip(names,var)
-            nam="$(var_name)_"*nam;
-            MOI.set(JuMP.backend(m), MOI.VariableName(), v, "$(var_name)"*nam)
-        end
-        var_ref = VariableRef[VariableRef(m, v) for v in MOI.VectorOfVariables(var).variables];
-        cont =  JuMP.Containers.DenseAxisArray(var_ref, names);
-        return cont
-        println("Variable = $(var_name) add to the JuMP model")
+function var_const(m,var_name,names)
+    size = length(names); 
+    var = MOI.add_variables(JuMP.backend(m),size);
+    for (nam,v) in zip(names,var)
+        nam="$(var_name)_"*nam;
+        MOI.set(JuMP.backend(m), MOI.VariableName(), v, "$(var_name)"*nam)
     end
+    var_ref = VariableRef[VariableRef(m, v) for v in MOI.VectorOfVariables(var).variables];
+    cont =  JuMP.Containers.DenseAxisArray(var_ref, names);
+    return cont
+    println("Variable = $(var_name) add to the JuMP model")
+end
     
     #=
     @benchmark var_const(m,:CAP,a) 

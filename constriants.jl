@@ -4,7 +4,9 @@
 
 set_ =  concat_sets(set_rfeas,set_h,set_t);
 b = [ haskey(param_can_exports_h,"$s") ? param_lmnt["$s"] + param_can_exports_h["$s"] : param_lmnt["$s"] for s in set_];
+
 cont_ = JuMP.@constraint(model,   variables["LOAD"].data[1:end] .== b[1:end]);
+
 constraints["eq_loadcon"] =JuMP.Containers.DenseAxisArray(cont_,set_);
 
 # -----------------------------------------------------------------------
@@ -19,6 +21,7 @@ keys_ = keys(dict_valcap);
 f_set_ = filter( x-> in(x,keys_), set_);
 b = [param_exo_cap[s] for s in f_set_];
 A = [variables["CAP"][s] for s in f_set_];
+
 cont_ = JuMP.@constraint(model,   A[1:end] .== b[1:end]);
 constraints["eq_cap_init_noret"] = JuMP.Containers.DenseAxisArray(cont_,f_set_);
 
@@ -49,6 +52,16 @@ constraints["eq_cap_init_retmo"] = JuMP.Containers.DenseAxisArray(cont_,f_set_);
 cons_name = "eq_cap_new_noret"
 constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, concat_sets(set_i2,set_initc,set_rfeas,set_t));
 # eq_cap_new_noret
+# f_set = [(i,c,r,t) for i in (set_i2), c in (set_initc), r in (set_rfeas), t in (set_t) 
+# if ((t <= set_retireyear[1]) | !haskey(dict_retiretech,"$(i)_$(c)_$(r)_$(t)")) & haskey(dict_valcap,"$(i)_$(c)_$(r)_$(t)") ]
+# lhs_1 = [variables["CAP"][join((i,c,r,t),'_')] for (i,c,r,t) in f_set ];
+
+# valid_tt_1 = [ (i,c,r,t) for (i,c,r,t) in f_set 
+#                 if (tt <= t) & haskey(dict_inv_cond,"$(i)_$(c)_$(t)_$(tt)") & haskey(dict_valcap,"$(i)_$(c)_$(r)_$(tt)")];
+# rhs_1 = [param_degrade["$(i)_$(tt)_$(t)"]*variables["INV"][join((i,c,r,tt),'_')] for (i,c,r,t) in valid_tt_1 ];
+
+# cont_ = JuMP.@constraint(model,   lhs_1 .== rhs_1 + rhs_2);
+
 for i in (set_i2), c in (set_initc), r in (set_rfeas), t in (set_t)
 
     if ((t <= set_retireyear[1]) | !haskey(dict_retiretech,"$(i)_$(c)_$(r)_$(t)")) & haskey(dict_valcap,"$(i)_$(c)_$(r)_$(t)") 
@@ -64,7 +77,8 @@ for i in (set_i2), c in (set_initc), r in (set_rfeas), t in (set_t)
         
         constraints["$(cons_name)"][join((i,c,r,t),'_')]  = 
             #LHS
-            JuMP.@constraint(model, variables["CAP"][join((i,c,r,t),'_')]  ==  
+            JuMP.@constraint(model, 
+            variables["CAP"][join((i,c,r,t),'_')]  ==  
             #RHS
             rhs_1 + rhs_2
         )
@@ -206,10 +220,10 @@ for i in (set_rsc_i), c in (set_newc), r in (set_rfeas), t in (set_t)
     if  haskey(dict_valcap,"$(i)_$(c)_$(r)_$(t)") 
         
         valid_sum_1 = [rscbin for rscbin in (set_rscbin) if haskey(param_m_rscfeas,"$(r)_$(i)_$(rscbin)")];
-        
+        lhs_1 = !isempty(valid_sum_1) ? sum([ variables["INV_RSC"][join((i,c,r,t,rsc),"_")] for rsc in valid_sum_1 ]) : 0 ;
        constraints["$(cons_name)"][join((i,c,r,t),"_")] = JuMP.@constraint(model,
             #LHS
-            sum([ variables["INV_RSC"][join((i,c,r,t,rsc),"_")] for rsc in valid_sum_1 ])
+            lhs_1
             ==
             #RHS
             variables["INV"][join((i,c,r,t),"_")] 
