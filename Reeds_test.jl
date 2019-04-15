@@ -10,11 +10,11 @@ model = Model(with_optimizer(Gurobi.Optimizer));
 constraints = Dict{String, JuMP.Containers.DenseAxisArray}();
 variables = Dict{String, JuMP.Containers.DenseAxisArray}();
 
-include("./variables.jl")
+include("variables.jl")
 include("constriants.jl")
-include("./Objective.jl")
+include("Objective.jl")
 
 JuMP.@objective(model, Min, cost_func)
 
-@time optimize!(m)
-println(termination_status(m))
+@time optimize!(model)
+println(termination_status(model))
