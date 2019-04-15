@@ -1,185 +1,107 @@
-
-# Create Variable CAP,INV
-var_name = "CAP"
-variables["CAP"] =  JuMP.Containers.DenseAxisArray{JuMP.variable_type(model)}(undef, set_i2,set_c,set_r,set_t)
-variables["INV"] =  JuMP.Containers.DenseAxisArray{JuMP.variable_type(model)}(undef, set_i2,set_c,set_r,set_t)
-for i in set_i2, c in set_c, r in set_r, t in set_t 
-        variables["CAP"][i, c, r, t] = JuMP.@variable(model, base_name="CAP_{$i,$c, $r, $t}", start = 0.0, binary=false)
-        variables["INV"][i, c, r, t] = JuMP.@variable(model, base_name="INV_{$i,$c, $r, $t}", start = 0.0, binary=false)
-end
-
-# Create Variable INVREFURB, EXTRA_PRESCRIP
-
-variables["INVREFURB"] =  JuMP.Containers.DenseAxisArray{JuMP.variable_type(model)}(undef,set_i2,set_r,set_t)
-variables["EXTRA_PRESCRIP"] =  JuMP.Containers.DenseAxisArray{JuMP.variable_type(model)}(undef, set_pcat,set_r,set_t)
-for i in set_i2, r in set_r, t in set_t
-    variables["INVREFURB"][i, r, t] = JuMP.@variable(model, base_name="INVREFURB_{$i, $r, $(t)}", start = 0.0, binary=false)
-
-    if in(i,set_pcat)
-        variables["EXTRA_PRESCRIP"][i, r, t] = JuMP.@variable(model, base_name="EXTRA_PRESCRIP_{$(i), $(r), $(t)}", start = 0.0, binary=false)
+function concat_sets(axs...)
+        str_set = [join(collect(tup),"_") for tup in vec(collect(Base.product(axs...)))];
+        return str_set
     end
     
-end
-
-# Create Variable INV_RSC
-var_name = "INV_RSC"
-variables["$(var_name)"] =  JuMP.Containers.DenseAxisArray{JuMP.variable_type(model)}(undef, set_i2,set_c,set_r,set_t,set_rscbin)
-for i in set_i2, c in set_c, r in set_r, t in set_t
-    if in(i,set_rsc_i)
-        for rscbin in set_rscbin
-            variables["$(var_name)"][i, c, r, t, rscbin] = 
-                JuMP.@variable(model, base_name="$(var_name)_{$i, $c, $r, $t, $rscbin}", start = 0.0, binary=false)
+    function var_const(m,var_name,names)
+        size = length(names); 
+        var = MOI.add_variables(JuMP.backend(m),size);
+        for (nam,v) in zip(names,var)
+            nam="$(var_name)_"*nam;
+            MOI.set(JuMP.backend(m), MOI.VariableName(), v, "$(var_name)"*nam)
         end
+        var_ref = VariableRef[VariableRef(m, v) for v in MOI.VectorOfVariables(var).variables];
+        cont =  JuMP.Containers.DenseAxisArray(var_ref, names);
+        return cont
+        println("Variable = $(var_name) add to the JuMP model")
     end
-end
-
-### Generation and storage variables
-#### Note that in constraints where both GEN and STORAGE_OUT exist, CSP-TES is normally represented as STORAGE_OUT
-
-# Create Variable GEN,STORAGE_IN, STORAGE_OUT, STORAGE_LEVEL
-var_name = "GEN"
-variables["GEN"] =  JuMP.Containers.DenseAxisArray{JuMP.variable_type(model)}(undef, set_i2,set_c,set_r,set_h,set_t)
-variables["STORAGE_IN"] =  JuMP.Containers.DenseAxisArray{JuMP.variable_type(model)}(undef, set_i2,set_c,set_r,set_h,set_t)
-variables["STORAGE_OUT"] =  JuMP.Containers.DenseAxisArray{JuMP.variable_type(model)}(undef, set_i2,set_c,set_r,set_h,set_t)
-variables["STORAGE_LEVEL"] =  JuMP.Containers.DenseAxisArray{JuMP.variable_type(model)}(undef, set_i2,set_c,set_r,set_h,set_t)
-for i in set_i2, c in set_c, r in set_r, h in set_h, t in set_t
-    variables["GEN"][i, c, r, h, t] = JuMP.@variable(model, base_name="GEN_{$(i), $(c), $(r), $(h), $(t)}", start = 0.0, binary=false)
-    variables["STORAGE_IN"][i, c, r, h, t] = JuMP.@variable(model, base_name="STORAGE_IN_{$(i), $(c), $(r), $(h), $(t)}", start = 0.0, binary=false)
-    variables["STORAGE_OUT"][i, c, r, h, t] = JuMP.@variable(model, base_name="STORAGE_OUT_{$(i), $(c), $(r), $(h), $(t)}", start = 0.0, binary=false)
-    variables["STORAGE_LEVEL"][i, c, r, h, t] = JuMP.@variable(model, base_name="STORAGE_LEVEL_{$(i), $(c), $(r), $(h), $(t)}", start = 0.0, binary=false)
-end
-
-
-# Create Variable CURT
-var_name = "CURT"
-variables["$(var_name)"] =  JuMP.Containers.DenseAxisArray{JuMP.variable_type(model)}(undef, set_r,set_h,set_t)
-for r in set_r, h in set_h, t in set_t
-    variables["$(var_name)"][r, h, t] = 
-        JuMP.@variable(model, base_name="$(var_name)_{$(r), $(h), $(t)}", start = 0.0, binary=false)
-end
-
-# Create Variable MINGEN
-var_name = "MINGEN"
-variables["$(var_name)"] =  JuMP.Containers.DenseAxisArray{JuMP.variable_type(model)}(undef, set_r,set_szn,set_t)
-for r in set_r, szn in set_szn, t in set_t
-    variables["$(var_name)"][r, szn, t] = 
-        JuMP.@variable(model, base_name="$(var_name)_{$(r), $(szn), $(t)}", start = 0.0, binary=false)
-end
-
-### Trade variables
-# Create Variable FLOW
-var_name = "FLOW"
-variables["$(var_name)"] =  JuMP.Containers.DenseAxisArray{JuMP.variable_type(model)}(undef, set_r,set_r,set_h,set_t,set_trtype)
-for r in set_r, rr in set_r, h in set_h, t in set_t, trtype in set_trtype
-    variables["$(var_name)"][r, rr, h, t, trtype] = 
-        JuMP.@variable(model, base_name="$(var_name)_{$(r), $(rr), $(h), $(t), $(trtype)}", start = 0.0, binary=false)
-end
-
-# Create Variable OPRES_FLOW
-var_name = "OPRES_FLOW"
-variables["$(var_name)"] =  JuMP.Containers.DenseAxisArray{JuMP.variable_type(model)}(undef, set_ortype,set_r,set_r,set_h,set_t)
-for ortype in set_ortype, r in set_r, rr in set_r, h in set_h, t in set_t
-    variables["$(var_name)"][ortype, r, rr, h, t] = 
-        JuMP.@variable(model, base_name="$(var_name)_{$(ortype), $(r), $(rr), $(h), $(t)}", start = 0.0, binary=false)
-end
-
-# Create Variable PRMTRADE
-var_name = "PRMTRADE"
-variables["$(var_name)"] =  JuMP.Containers.DenseAxisArray{JuMP.variable_type(model)}(undef, set_r,set_r,set_szn,set_t)
-for r in set_r, rr in set_r, szn in set_szn, t in set_t
-    variables["$(var_name)"][r, rr, szn, t] = 
-        JuMP.@variable(model, base_name="$(var_name)_{$(r), $(rr), $(szn), $(t)}", start = 0.0, binary=false)
-end
-
-### Operating reserve variables
-
-# Create Variable OPRES
-var_name = "OPRES"
-variables["$(var_name)"] =  JuMP.Containers.DenseAxisArray{JuMP.variable_type(model)}(undef, set_i2,set_c,set_r,set_h,set_t)
-for i in set_i2, c in set_c, r in set_r, h in set_h, t in set_t
-    variables["$(var_name)"][i, c, r, h, t] = 
-        JuMP.@variable(model, base_name="$(var_name)_{$(i), $(c), $(r), $(h), $(t)}", start = 0.0, binary=false)
-end
-
-### Fuel amounts variable 
-
-var_name = "GasUsed"
-variables["$(var_name)"] =  JuMP.Containers.DenseAxisArray{JuMP.variable_type(model)}(undef, set_cendiv,set_gb,set_h,set_t)
-for cendiv in set_cendiv, gb in set_gb, r in set_r, h in set_h, t in set_t
-    variables["$(var_name)"][cendiv,gb,h,t] = 
-        JuMP.@variable(model, base_name="$(var_name)_{$(cendiv), $(gb), $(h), $(t)}", start = 0.0, binary=false)
-end
-
-var_name = "Vgasbinq_national"
-variables["$(var_name)"] =  JuMP.Containers.DenseAxisArray{JuMP.variable_type(model)}(undef, set_fuelbin,set_t)
-for fuelbin in set_fuelbin,  t in set_t
-    variables["$(var_name)"][fuelbin,t] = 
-        JuMP.@variable(model, base_name="$(var_name)_{$(fuelbin), $(t)}", start = 0.0, binary=false)
-end
-
-var_name = "Vgasbinq_regional"
-variables["$(var_name)"] =  JuMP.Containers.DenseAxisArray{JuMP.variable_type(model)}(undef, set_fuelbin,set_cendiv,set_t)
-for fuelbin in set_fuelbin, cendiv in set_cendiv,  t in set_t
-    variables["$(var_name)"][fuelbin,cendiv,t] = 
-        JuMP.@variable(model, base_name="$(var_name)_{$(fuelbin), $(cendiv), $(t)}", start = 0.0, binary=false)
-end
-
-var_name = "BIOUSED"
-variables["$(var_name)"] =  JuMP.Containers.DenseAxisArray{JuMP.variable_type(model)}(undef, set_bioclass,set_r,set_t)
-for bioclass in set_bioclass, r in set_r,  t in set_t
-    variables["$(var_name)"][bioclass,r,t] = 
-        JuMP.@variable(model, base_name="$(var_name)_{$(bioclass), $(r), $(t)}", start = 0.0, binary=false)
-end
-
-# * RECS variables
-
-var_name = "RECS"
-variables["$(var_name)"] =  JuMP.Containers.DenseAxisArray{JuMP.variable_type(model)}(undef, set_RPSCat,set_i2,set_st,set_st,set_t)
-for RPSCat in set_RPSCat, i in set_i2, st in set_st, ast in set_st, t in set_t
-    variables["$(var_name)"][RPSCat,i,st,ast,t] = 
-        JuMP.@variable(model, base_name="$(var_name)_{$(RPSCat),$(i), $(st), $(ast), $(t)}", start = 0.0, binary=false)
-end
-
-var_name = "ACP_Purchases"
-variables["$(var_name)"] =  JuMP.Containers.DenseAxisArray{JuMP.variable_type(model)}(undef, set_RPSCat,set_st,set_t)
-for RPSCat in set_RPSCat,  st in set_st,  t in set_t
-    variables["$(var_name)"][RPSCat,st,t] = 
-        JuMP.@variable(model, base_name="$(var_name)_{$(RPSCat), $(st), $(t)}", start = 0.0, binary=false)
-end
-
-var_name = "EMIT"
-variables["$(var_name)"] =  JuMP.Containers.DenseAxisArray{JuMP.variable_type(model)}(undef, set_e,set_r,set_t)
-for e in set_e,  r in set_r,  t in set_t
-    variables["$(var_name)"][e,r,t] = 
-        JuMP.@variable(model, base_name="$(var_name)_{$(e), $(r), $(t)}", start = 0.0, binary=false)
-end
-
-# * transmission variables
-
-var_name = "CAPTRAN"
-variables["$(var_name)"] =  JuMP.Containers.DenseAxisArray{JuMP.variable_type(model)}(undef, set_r,set_r,set_trtype,set_t)
-for r in set_r,  rr in set_r, trtype in set_trtype, t in set_t
-    variables["$(var_name)"][r,rr,trtype,t] = 
-        JuMP.@variable(model, base_name="$(var_name)_{$(r), $(rr), $(trtype), $(t)}", start = 0.0, binary=false)
-end
-
-var_name = "INVTRAN"
-variables["$(var_name)"] =  JuMP.Containers.DenseAxisArray{JuMP.variable_type(model)}(undef, set_r,set_r,set_t,set_trtype)
-for r in set_r,  rr in set_r, t in set_t,  trtype in set_trtype
-    variables["$(var_name)"][r,rr,t,trtype] = 
-        JuMP.@variable(model, base_name="$(var_name)_{$(r), $(rr), $(t), $(trtype)}", start = 0.0, binary=false)
-end
-
-var_name = "INVSUBSTATION"
-variables["$(var_name)"] =  JuMP.Containers.DenseAxisArray{JuMP.variable_type(model)}(undef, set_r,set_vc,set_t)
-for r in set_r, vc in set_vc, t in set_t
-    variables["$(var_name)"][r,vc,t] = 
-        JuMP.@variable(model, base_name="$(var_name)_{$(r), $(vc), $(t)}", start = 0.0, binary=false)
-end
-
-var_name = "LOAD"
-variables["$(var_name)"] =  JuMP.Containers.DenseAxisArray{JuMP.variable_type(model)}(undef, set_r,set_h,set_t)
-for r in set_r, h in set_h, t in set_t
-    variables["$(var_name)"][r,h,t] = 
-        JuMP.@variable(model, base_name="$(var_name)_{$(r), $(h), $(t)}", start = 0.0, binary=false)
-end
+    
+    #=
+    @benchmark var_const(m,:CAP,a) 
+    
+    BenchmarkTools.Trial: 
+      memory estimate:  31.78 MiB
+      allocs estimate:  855520
+      --------------
+      minimum time:     98.758 ms (11.21% GC)
+      median time:      116.127 ms (22.46% GC)
+      mean time:        265.604 ms (8.72% GC)
+      maximum time:     2.398 s (1.72% GC)
+      --------------
+      samples:          19
+      evals/sample:     1
+    
+    =#
+    
+    function variable_constructor(model,var_name,str_set)
+        con =  JuMP.Containers.DenseAxisArray{JuMP.variable_type(model)}(undef, str_set);
+        for (ix,s) in enumerate(str_set)
+            con.data[ix] = JuMP.@variable(model, base_name="$s",start = 0.0, binary=false)
+        end
+        return con;
+        println("Variable = $(var_name) add to the JuMP model")
+    end
+    
+    #=
+    
+    BenchmarkTools.Trial: 
+      memory estimate:  27.86 MiB
+      allocs estimate:  1197699
+      --------------
+      minimum time:     147.769 ms (0.00% GC)
+      median time:      3.522 s (54.81% GC)
+      mean time:        8.918 s (87.93% GC)
+      maximum time:     23.085 s (93.54% GC)
+      --------------
+      samples:          3
+      evals/sample:     1
+    =#
+    
+    set_icrt = concat_sets(set_i2,set_c,set_rfeas,set_t);
+    variables["CAP"] = var_const(model,:CAP,set_icrt);
+    variables["INV"] = var_const(model,:INV,set_icrt);
+    variables["INVREFURB"] = var_const(model,:INVREFURB,set_icrt)
+    variables["EXTRA_PRESCRIP"] = var_const(model,:EXTRA_PRESCRIP,concat_sets(set_pcat,set_rfeas,set_t));
+    variables["INV_RSC"] = var_const(model,:INV_RSC,concat_sets(set_rsc_i,set_c,set_rfeas,set_t,set_rscbin));
+    
+    set_icrht = concat_sets(set_i2,set_c,set_rfeas,set_h,set_t);
+    variables["GEN"] = var_const(model,:GEN,set_icrht);
+    variables["STORAGE_IN"] = var_const(model,:STORAGE_IN,set_icrht);
+    variables["STORAGE_OUT"] = var_const(model,:STORAGE_OUT,set_icrht);
+    variables["STORAGE_LEVEL"] = var_const(model,:STORAGE_LEVEL,set_icrht);
+    variables["CURT"] = var_const(model,:CURT,concat_sets(set_rfeas,set_h,set_t));
+    variables["MINGEN"] = var_const(model,:MINGEN,concat_sets(set_rfeas,set_szn,set_t));
+    
+    
+    variables["FLOW"] = var_const(model,:FLOW,concat_sets(set_rfeas,set_rfeas,set_h,set_t,set_trtype));
+    variables["OPRES_FLOW"] = var_const(model,:OPRES_FLOW,concat_sets(set_ortype,set_rfeas,set_rfeas,set_h,set_t));
+    variables["PRMTRADE"] = var_const(model,:PRMTRADE,concat_sets(set_rfeas,set_rfeas,set_szn,set_t));
+    
+    variables["OPRES"] = var_const(model,:OPRES,concat_sets(set_ortype,set_i2,set_c,set_rfeas,set_h,set_t));
+    variables["GasUsed"] = var_const(model,:GasUsed,concat_sets(set_cendiv,set_gb,set_h,set_t));
+    variables["Vgasbinq_national"] = var_const(model,:Vgasbinq_national,concat_sets(set_fuelbin,set_t));
+    variables["Vgasbinq_regional"] = var_const(model,:Vgasbinq_regional,concat_sets(set_fuelbin,set_cendiv,set_t));
+    variables["BIOUSED"] = var_const(model,:BIOUSED,concat_sets(set_bioclass,set_rfeas,set_t));
+    
+    variables["RECS"] = var_const(model,:RECS,concat_sets(set_RPSCat,set_i2,set_st,set_st,set_t));
+    variables["ACP_Purchases"] =  var_const(model,:ACP_Purchases,concat_sets(set_RPSCat,set_st,set_t));
+    variables["EMIT"] = var_const(model,:EMIT,concat_sets(set_e,set_rfeas,set_t));
+    
+    set_rrttr = concat_sets(set_rfeas,set_rfeas,set_t,set_trtype);
+    variables["CAPTRAN"] = var_const(model,:CAPTRAN,set_rrttr);
+    variables["INVTRAN"] = var_const(model,:INVTRAN,set_rrttr);
+    variables["INVSUBSTATION"] = var_const(model,:INVSUBSTATION,concat_sets(set_rfeas,set_vc,set_t));
+    
+    variables["LOAD"] = var_const(model,:LOAD,concat_sets(set_rfeas,set_h,set_t));
+    # variable_constructor(model,variables,:var_name,set_);
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    

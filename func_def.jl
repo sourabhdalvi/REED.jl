@@ -104,3 +104,36 @@ function read_set_5D(csv_path)
     end
     return collect(Set(slist))
 end
+    
+function collect_set_dict4D(file_path)
+    set_= DataFrames.dropmissing(CSV.read(file_path,header=0), disallowmissing=true);
+    dict_ = Dict()
+    nrow,ncol = size(set_)
+    for row in 1:nrow
+        a = set_[row,1];b = set_[row,2];c = set_[row,3];d = set_[row,4];
+        dict_["$(a)_$(b)_$(c)_$(d)"] = true ;
+    end
+    return dict_
+end
+
+function collect_set_dict3D(file_path)
+    set_= DataFrames.dropmissing(CSV.read(file_path,header=0), disallowmissing=true);
+    dict_ = Dict()
+    nrow,ncol = size(set_)
+    for row in 1:nrow
+        a = set_[row,1];b = set_[row,2];c = set_[row,3]
+        dict_["$(a)_$(b)_$(c)"] = true ;
+    end
+    return dict_
+end
+
+function collect_set_dict2D(file_path)
+    set_= DataFrames.dropmissing(CSV.read(file_path,header=0), disallowmissing=true);
+    dict_ = Dict()
+    nrow,ncol = size(set_)
+    for row in 1:nrow
+        a = set_[row,1];b = set_[row,2];
+        dict_["$(a)_$(b)"] = true ;
+    end
+    return dict_
+end

@@ -73,7 +73,13 @@ set_tranfeas = read_set_2D("../GDX_data/Param_tranfeas.csv");
 set_RGGI_r =  read_set("../GDX_data/Param_RGGI_r.csv");
 set_RecTech = read_set_4D("../GDX_data/Param_RecTech.csv");
 set_RecMap = read_set_5D("../GDX_data/Param_RecMap.csv");
-
+set_retiretech = read_set_4D("../GDX_data/Set_retiretech.csv"); 
+set_inv_cond= read_set_4D("../GDX_data/Set_inv_cond.csv"); 
+set_i2 = read_set("../GDX_data/Set_i2.csv");
+set_rfeas = read_set("../GDX_data/Set_rfeas.csv");
+set_rfeas_cap = read_set("../GDX_data/Set_rfeas_cap.csv");
+set_m_refurb_cond = read_set_4D("../GDX_data/Set_m_refurb_cond.csv"); 
+set_fuelbin = read_set("../GDX_data/Set_fuelbin.csv");
 
 # Param
 param_exo_cap = collect_4D("../GDX_data/Parm_m_capacity_exog.csv");
@@ -92,7 +98,7 @@ param_hours = collect_1D("../GDX_data/Parm_hours.csv");
 param_outage = collect_2D("../GDX_data/Parm_outage.csv");
 param_orperc = collect_2D("../GDX_data/Parm_orperc.csv");
 param_cf_tech = collect_1D("../GDX_data/Parm_cf_tech.csv");
-param_tranloss= collect_1D("../GDX_data/Parm_tranloss.csv");
+param_tranloss= collect_2D("../GDX_data/Parm_tranloss.csv");
 param_inertia_req = collect_1D("../GDX_data/Param_inertia_req.csv");
 param_m_rsc_dat = collect_4D("../GDX_data/Param_m_rsc_dat.csv");
 param_resourcescaler = collect_1D("../GDX_data/Param_resourcescaler.csv");
@@ -122,7 +128,9 @@ param_storage_duration = collect_1D("../GDX_data/Param_storage_duration.csv");
 param_m_rscfeas = collect_3D("../GDX_data/Param_m_rscfeas.csv");
 param_can_exports_h = collect_3D("../GDX_data/Param_can_exports_h.csv");
 param_lmnt = collect_3D("../GDX_data/Param_lmnt.csv");
-
+param_peakdem = collect_3D("../GDX_data/Param_peakdem.csv");
+param_RGGICap = collect_1D("../GDX_data/Param_RGGICap.csv");
+param_offshore_cap_req =collect_2D("../GDX_data/Param_offshore_cap_req.csv");
 #Cost
 param_cost_cap_fin_mult = collect_3D("../GDX_data/Param_cost_cap_fin_mult.csv");
 param_cost_cap = collect_2D("../GDX_data/Param_cost_cap.csv");
@@ -151,19 +159,28 @@ param_hurdle = collect_2D("../GDX_data/Param_hurdle.csv");
 param_emit_tax = collect_3D("../GDX_data/Param_emit_tax.csv");
 param_acp_price = collect_2D("../GDX_data/Param_acp_price.csv");
 
-set_t = Set([2010,2012,2014,2016,2018,2020]);
-set_retiretech = Set([(i,c,r,t) for i in set_i, c in set_c, r in set_r, t in set_t 
-            if  in(i,Set(["CoalOldScr","CoalOldUns","Gas-GG","Gas-CT"])) &  in(c,set_initc) & !in(i,set_ban_i)]);
-set_inv_cond = Set([(i,c,t,tt) for i in set_i, c in set_newc, t in set_t, tt in set_t  
-                if (!in(i,set_bannew_i) & !in(i,set_ban_i) & (tt <= t) & in((i,c,tt),set_ict) & (t-tt <= param_maxage[i])) # missing Tmodel_new
-                | ((i=="csp-ns") & (tt == 2010) & (t-tt <= param_maxage[i]) & in((i,c,tt),set_ict) )]);
-set_i2 = Set([i for i in set_i if !in(i,set_ban_i)]);
+set_t = [ t for t in set_t if t < 2021];
+dict_valcap = collect_set_dict4D("../GDX_data/Set_valcap.csv");
+dict_retiretech = collect_set_dict4D("../GDX_data/Set_retiretech.csv");
+dict_inv_cond = collect_set_dict4D("../GDX_data/Set_inv_cond.csv");
+dict_ict = collect_set_dict3D("../GDX_data/Set_ict.csv");
+dict_m_refurb_cond = collect_set_dict4D("../GDX_data/Set_m_refurb_cond.csv");
+dict_cap_agg = collect_set_dict2D("../GDX_data/Set_cap_agg.csv");
+dict_routes = collect_set_dict4D("../GDX_data/Parm_routes.csv");
+dict_opres_routes = collect_set_dict3D("../GDX_data/Parm_opres_routes.csv");
 
-set_rfeas = Set([ r for r in set_r if in(r,set_r_ercot) ]);
+# set_retiretech =  Set([(i,c,r,t) for i in set_i, c in set_c, r in set_r, t in set_t 
+                        # if  in(i,Set(["CoalOldScr","CoalOldUns","Gas-GG","Gas-CT"])) &  in(c,set_initc) & !in(i,set_ban_i)]);
+# set_inv_cond = Set([(i,c,t,tt) for i in set_i, c in set_newc, t in set_t, tt in set_t  
+#                 if (!in(i,set_bannew_i) & !in(i,set_ban_i) & (tt <= t) & in((i,c,tt),set_ict) & (t-tt <= param_maxage[i])) # missing Tmodel_new
+#                 | ((i=="csp-ns") & (tt == 2010) & (t-tt <= param_maxage[i]) & in((i,c,tt),set_ict) )]);
+# set_i2 = Set([i for i in set_i if !in(i,set_ban_i)]);
 
-set_rfeas_cap = Set([ r for r in set_rfeas, rs in set_rs if (sum([ 1 for rr in set_rfeas if haskey(param_r_rs,"$r"*"_"*"$rs")]) > 0) & !(r=="sk") ]);
+# set_rfeas = Set([ r for r in set_r if in(r,set_r_ercot) ]);
 
-set_m_refurb_cond = Set([(i,c,r,t) for i in set_i2, c in set_newc, r in set_r, t in set_t, tt in set_t
-                        if in(i,set_refurbtech) & (tt <= t) & (t-tt > param_maxage[i]) 
-                            & in((i,c,tt),set_ict) 
-                            & in((i,c,r,t),set_valcap) & in((i,c,r,tt),set_valcap) ]);
+# set_rfeas_cap = Set([ r for r in set_rfeas, rs in set_rs if (sum([ 1 for rr in set_rfeas if haskey(param_r_rs,"$r"*"_"*"$rs")]) > 0) & !(r=="sk") ]);
+
+# set_m_refurb_cond = Set([(i,c,r,t) for i in set_i2, c in set_newc, r in set_r, t in set_t, tt in set_t
+#                         if in(i,set_refurbtech) & (tt <= t) & (t-tt > param_maxage[i]) 
+#                             & in((i,c,tt),set_ict) 
+#                             & in((i,c,r,t),set_valcap) & in((i,c,r,tt),set_valcap) ]);
