@@ -710,7 +710,7 @@ for r in (set_rfeas), rr in (set_rfeas), trtype in (set_trtype), t in (set_t)
         constraints["$(cons_name)"][join((r,rr,trtype,t),"_")] = JuMP.@constraint(model,
             lhs_1
             >=
-            rhs_2
+            rhs_1
         )
     end
 end
