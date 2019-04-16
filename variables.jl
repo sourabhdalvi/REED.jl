@@ -8,7 +8,7 @@ function var_const(m,var_name,names)
     var = MOI.add_variables(JuMP.backend(m),size);
     for (nam,v) in zip(names,var)
         nam="$(var_name)_"*nam;
-        MOI.set(JuMP.backend(m), MOI.VariableName(), v, "$(var_name)"*nam)
+        MOI.set(JuMP.backend(m), MOI.VariableName(), v, nam)
     end
     var_ref = VariableRef[VariableRef(m, v) for v in MOI.VectorOfVariables(var).variables];
     cont =  JuMP.Containers.DenseAxisArray(var_ref, names);
