@@ -411,20 +411,20 @@ end
 
 # -----------------------------------------------------------------------
 
-cons_name = "eq_mingen_ub"
+cons_name = "eq_mingen_ub";
 temp_h_szn = [join(collect(tup),"_") for tup in set_h_szn];
-constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, set_rfeas_cap,temp_h_szn,set_t)
+constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, concat_sets(set_rfeas_cap,temp_h_szn,set_t));
 
 for r in set_rfeas_cap, (h ,szn) in set_h_szn, t in set_t
     val_sum_1 = [ (i,c) for i in (set_i2), c in (set_c) 
                     if haskey(dict_valcap,"$(i)_$(c)_$(r)_$(t)")  & haskey(param_minloadfrac,"$r"*"_"*"$i"*"_"*"$h") ];
-    rhs_1 = sum([ variables["GEN"][join((i,c,r,h,t),"_")] for (i,c) in val_sum_1 ];
-    constraints["$(cons_name)"][r,h,szn,t] = JuMP.@constraint(model,
-        variables["MINGEN"][r,szn,t]
+    rhs_1 = !isempty(val_sum_1) ? sum([ variables["GEN"][join((i,c,r,h,t),"_")] for (i,c) in val_sum_1 ]) : 0 ;
+    constraints["$(cons_name)"][join((r,h,szn,t),"_")] = JuMP.@constraint(model,
+        variables["MINGEN"][join((r,szn,t),"_")]
         <=
         rhs_1 
-        + 0 # geothermal
-    )
+        + 0 ) # geothermal
+    
 end
 
 # -----------------------------------------------------------------------
