@@ -183,7 +183,7 @@ end
 
 # eq_neartermcaplimit
 cons_name = "eq_neartermcaplimit";
-constraints["$(cons_name)"] = JuMP.Containers.SparseAxisArray{JuMP.ConstraintRef}(undef, concat_sets(set_rfeas_cap,set_t) );
+constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, concat_sets(set_rfeas_cap,set_t) );
 for r in set_rfeas_cap, t in set_t 
     val_cond_1 = (sum([1 for rr in set_rfeas_cap if haskey(param_near_term_cap_limits,"Wind_$(r)_$(t)")]) > 0 )
     val_cond_2 = (sum([ 1 for i in set_i2, c in set_c if haskey(dict_valcap,"$(i)_$(c)_$(r)_$(t)") &  in(("Wind",i), set_tg_i)]) > 0) ; 
