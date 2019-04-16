@@ -528,7 +528,8 @@ end
 cons_name = "eq_ORCap"
 temp_i = [ i for i in set_i2 if !in(i,set_storage) & !in(i,set_hydro_d)];
 temp_ori = [ (or,i) for or in (set_ortype), i in (temp_i) if haskey(param_reserve_frac,"$(i)_$(or)") ];
-constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, concat_sets(concat_sets(temp_ori),set_c,set_rfeas,set_h,set_t));
+temp_st_ori = [join((or,i),"_") for or in (set_ortype), i in (temp_i) if haskey(param_reserve_frac,"$(i)_$(or)")];
+constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, concat_sets(temp_st_ori,set_c,set_rfeas,set_h,set_t));
 
 
 for (or,i) in temp_ori, c in (set_c), r in (set_rfeas), h in (set_h), t in (set_t)
@@ -537,7 +538,7 @@ for (or,i) in temp_ori, c in (set_c), r in (set_rfeas), h in (set_h), t in (set_
         val_sum_1 = [ (hh,szn) for (hh,szn) in set_h_szn if haskey(dict_maxload_szn,"$(r)_$(hh)_$(t)_$(szn)") ];
         lhs_1 = !isempty(val_sum_1) ? sum( [ variables["GEN"][join((i,c,r,hh,t),"_")] for (hh,szn) in val_sum_1 ]) : 0 ;
         
-        constraints["$(cons_name)"][join((or,i,c,r,h,t),"_")] = JuMP.@constraint(model,
+        constraints["eq_ORCap"][join((or,i,c,r,h,t),"_")] = JuMP.@constraint(model,
             
             param_reserve_frac["$(i)_$(or)"] * lhs_1  #
             >=
