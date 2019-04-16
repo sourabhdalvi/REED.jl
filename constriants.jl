@@ -524,15 +524,14 @@ end
 # * --- OPERATING RESERVE CONSTRAINTS ---
 # *=======================================
 cons_name = "eq_ORCap"
-constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, concat_sets(set_ortype,set_i2,set_c,set_rfeas,set_h,set_t));
+set_oricrht = concat_sets(set_ortype,set_i2,set_c,set_rfeas,set_h,set_t);
+constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, set_oricrht);
 
-for or in (set_ortype), i in (set_i2), c in (set_c), r in (set_rfeas), 
-    h in (set_h), hh in (set_h), t in (set_t)
+for or in (set_ortype), i in (set_i2), c in (set_c), r in (set_rfeas), h in (set_h), t in (set_t)
     
     if haskey(param_reserve_frac,"$(i)_$(or)") & !in(i,set_storage) & haskey(dict_valcap,"$(i)_$(c)_$(r)_$(t)") & !in(i,set_hydro_d) #$SwM_OpRes
         
-        val_sum_1 = [ (hh,szn) for (hh,szn) in set_h_szn
-                        if in((r,hh,t,szn),set_maxload_szn)];
+        val_sum_1 = [ (hh,szn) for (hh,szn) in set_h_szn if haskey(dict_maxload_szn,"$(r)_$(hh)_$(t)_$(szn)") ];
         lhs_1 = !isempty(val_sum_1) ? sum( [ variables["GEN"][join((i,c,r,hh,t),"_")] for (hh,szn) in val_sum_1 ]) : 0 ;
         
         constraints["$(cons_name)"][join((or,i,c,r,h,t),"_")] = JuMP.@constraint(model,
@@ -655,7 +654,7 @@ for r in (set_rfeas), szn in (set_szn), t in (set_t) #SwM_ReserveMargin
     lhs_2 = !isempty(val_sum_2) ? sum([ 0 for (i,rr) in val_sum_2 ]) :  0 ; # cv_old(i,rr,szn,t) set to zero ? why ?
     lhs_3 = !isempty(val_sum_3) ? sum( [ get(param_m_cv_mar,"$(i)_$(r)_$(szn)_$(t)",0)*variables["INV"][join((i,c,rr,t),"_")]  for (i,c,rr) in val_sum_3 ]) :  0 ; 
     lhs_4 = !isempty(val_sum_4) ? sum([ get(param_exo_cap,"distpv_$(c)_$(r)_$(t)",0)  - get(param_exo_cap,"distpv_$(c)_$(r)_$(t-2)",0) * get(param_m_cv_mar,"distpv_$(r)_$(szn)_$(t)",0) for c in val_sum_4 ]) : 0 ; 
-    lhs_5 = !isempty(val_sum_5) ? sum([ variables["CAP"][join((i,c,rr,t),"_")]*0 for (i,c,r) in val_sum_5 ]) :  0 ; # cv_avg(i,rr,szn,t) set to zero ? why ? 
+    lhs_5 = !isempty(val_sum_5) ? sum([ variables["CAP"][join((i,c,rr,t),"_")]*0 for (i,c,rr) in val_sum_5 ]) :  0 ; # cv_avg(i,rr,szn,t) set to zero ? why ? 
     lhs_6 = !isempty(val_sum_6) ? sum([  variables["GEN"][join((i,c,r,"h3",t),"_")] for (i,c) in val_sum_6 ]) :  0 ;  # "h3" => 6
     lhs_7 = !isempty(val_sum_7) ? sum([ param_cf_hyd_szn_adj["$(i)_$(szn)_$(r)"]*variables["CAP"][join((i,c,r,t),"_")] for (i,c) in val_sum_7 ])  :  0 ; 
     lhs_8 = !isempty(val_sum_8) ? sum([ (1-param_tranloss["$(rr)_$(r)"])* variables["PRMTRADE"][join((rr,r,szn,t),"_")] for rr in val_sum_8 ]) :  0 ; 
@@ -881,13 +880,13 @@ end
 # *==========================
 
 cons_name = "eq_REC_Generation"
-constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef,concat_sets(set_RPSCat,set_i2,set_st,set_t));
+constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef,concat_sets(set_RPSCat,set_i2,["TX"],set_t[2:end]));
 
-for rps in (set_RPSCat), i in (set_i2), st in (set_st), t in (set_t)
-    if (st=="TX") & !(t==set_t[1]) & (t > 2016)
+for rps in (set_RPSCat), i in (set_i2), st in ["TX"], t in (set_t)[2:end]
+    if  (t > 2016)
         val_sum_1 = [(c,r,h) for c in (set_c), r in (set_rfeas), h in (set_h) 
-                        if haskey(dict_valcap,"$(i)_$(c)_$(r)_$(t)") & in((rps,st,i,t),set_RecTech) & in((r,st),set_r_st)];
-        val_sum_2 = [ ast for ast in (set_st) if  in((i,rps,st,ast,t),set_RecMap)  & (ast=="TX")];
+                        if haskey(dict_valcap,"$(i)_$(c)_$(r)_$(t)") & haskey(dict_RecTech,"$(rps)_$(st)_$(i)_$(t)") & in((r,st),set_r_st)];
+        val_sum_2 = [ ast for ast in (["TX"]) if  haskey(dict_RecMap,"$(i)_$(rps)_$(st)_$(ast)_$(t)") ];
         
         lhs_1 = !isempty(val_sum_1) ? sum([ param_hours["$h"]*variables["GEN"][join((i,c,r,h,t),"_")] for (c,r,h) in val_sum_1 ]) : 0 ;
         rhs_1 = !isempty(val_sum_2) ? sum([ variables["RECS"][join((rps,i,st,ast,t),"_")] for ast in val_sum_2  ]) : 0 ;
@@ -1122,7 +1121,7 @@ end
 # *============================
 
 cons_name = "eq_storage_capacity"
-constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef,concat_sets(set_i2,set_c,set_rfeas,set_h,set_t));
+constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef,set_icrht);
 
 for i in (set_storage), c in (set_c),r in (set_rfeas), h in (set_h), t in (set_t)
     if haskey(dict_valcap,"$(i)_$(c)_$(r)_$(t)") 
@@ -1145,7 +1144,8 @@ end
 # -----------------------------------------------------------------------
 
 cons_name = "eq_csp_charge"
-constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef,concat_sets(set_csp_storage,set_c,set_rfeas,set_h,set_t));
+set_cspcrht = concat_sets(set_csp_storage,set_c,set_rfeas,set_h,set_t);
+constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef,set_cspcrht);
 
 for i in (set_csp_storage), c in (set_c), r in (set_rfeas), h in (set_h), t in (set_t)
     if haskey(dict_valcap,"$(i)_$(c)_$(r)_$(t)")  
@@ -1164,7 +1164,7 @@ end
 # -----------------------------------------------------------------------
 
 cons_name = "eq_csp_gen"
-constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef,concat_sets(set_i2,set_c,set_rfeas,set_h,set_t));
+constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef,set_icrht);
 
 for i in (set_i2), c in (set_c), r in (set_rfeas),  h in (set_h), t in (set_t)
     if haskey(dict_valcap,"$(i)_$(c)_$(r)_$(t)")
@@ -1179,7 +1179,7 @@ end
 # -----------------------------------------------------------------------
 
 cons_name = "eq_storage_level"
-constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef,concat_sets(set_csp_storage,set_c,set_rfeas,set_h,set_t));
+constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef,set_cspcrht);
 
 for i in (set_csp_storage), c in (set_c), r in (set_rfeas), h in (set_h), t in (set_t)
     if haskey(dict_valcap,"$(i)_$(c)_$(r)_$(t)")
@@ -1201,13 +1201,13 @@ end
 # -----------------------------------------------------------------------
 
 cons_name = "eq_storage_balance"
-constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef,set_szn,storage,set_c,set_rfeas,set_t);
+constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef,concat_sets(set_szn,set_storage,set_c,set_rfeas,set_t));
 
-for szn in (set_szn),i in (storage), c in (set_c), r in (set_rfeas),t in (set_t)
+for szn in (set_szn),i in (set_storage), c in (set_c), r in (set_rfeas),t in (set_t)
     if haskey(dict_valcap,"$(i)_$(c)_$(r)_$(t)") 
         val_sum_1 = [ h for h in (set_h) if in((h,szn),set_h_szn)];
-        lhs_1 = !isempty(val_sum_1 )  ?  sum([ param_hours["$h"]*variables["STORAGE_IN"][join((i,c,r,h,t),"_")]  for (ih,h) in val_sum_1 ]) : 0 ;
-        rhs_1 = !isempty(val_sum_1 )  ?  sum([param_hours["$h"]*variables["STORAGE_OUT"][join((i,c,r,h,t),"_")]  for (ih,h) in val_sum_1 ]) : 0 ;
+        lhs_1 = !isempty(val_sum_1 )  ?  sum([ param_hours["$h"]*variables["STORAGE_IN"][join((i,c,r,h,t),"_")]  for h in val_sum_1 ]) : 0 ;
+        rhs_1 = !isempty(val_sum_1 )  ?  sum([param_hours["$h"]*variables["STORAGE_OUT"][join((i,c,r,h,t),"_")]  for h in val_sum_1 ]) : 0 ;
         constraints["$(cons_name)"][join((szn,i,c,r,t),"_")] = JuMP.@constraint(model,
             param_storage_eff["$i"]* lhs_1
             ==
@@ -1219,7 +1219,7 @@ end
 # -----------------------------------------------------------------------
 
 cons_name = "eq_storage_thermalres"
-constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef,["ice"],set_c,set_rfeas,set_h,set_t);
+constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef,concat_sets(["ice"],set_c,set_rfeas,set_h,set_t));
 
 for i in (["ice"]), c in (set_c), r in (set_rfeas), h in (set_h), t in (set_t)
     if haskey(dict_valcap,"$(i)_$(c)_$(r)_$(t)") 
@@ -1234,15 +1234,16 @@ end
 # -----------------------------------------------------------------------
 
 cons_name = "eq_storage_duration"
-constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef,set_i2,set_c,set_rfeas,set_h,set_t);
+set_batcsp = push!(set_csp_storage,"battery");
+constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef,concat_sets(set_batcsp,set_c,set_rfeas,set_h,set_t));
 
-for i in (set_i2), c in (set_c), r in (set_rfeas), h in (set_h),t in (set_t)
-    if haskey(dict_valcap,"$(i)_$(c)_$(r)_$(t)") & ((i=="battery") | in(i,set_csp_storage))
-        val_sum_1 = [ rr for rr in (set_rfeas) if haskey(dict_valcap,"$(i)_$(c)_$(r)_$(t)") & haskey(dict_cap_agg,"$(r)_$(rr)") ];
+for i in (set_batcsp), c in (set_c), r in (set_rfeas), h in (set_h),t in (set_t)
+    if haskey(dict_valcap,"$(i)_$(c)_$(r)_$(t)") 
+        val_sum_1 = [ rr for rr in (set_rfeas_cap) if haskey(dict_valcap,"$(i)_$(c)_$(r)_$(t)") & haskey(dict_cap_agg,"$(r)_$(rr)") ];
         rhs_1 = !in(i,set_csp_storage) ? variables["STORAGE_IN"][join((i,c,r,h,t),"_")]*param_hours["$h"]/sum([param_numdays["$szn"] for szn in set_szn if in((h,szn),set_h_szn) ]) : 0;
         rhs_2 = in(i,set_csp_storage) ? variables["STORAGE_LEVEL"][join((i,c,r,h,t),"_")] : 0;
         
-        constraints["$(cons_name)"][join((i,c,r,t),"_")] = JuMP.@constraint(model,
+        constraints["$(cons_name)"][join((i,c,r,h,t),"_")] = JuMP.@constraint(model,
             sum([ param_storage_duration["$i"]*variables["CAP"][join((i,c,rr,t),"_")] for rr in val_sum_1 ])
             >=
             rhs_1

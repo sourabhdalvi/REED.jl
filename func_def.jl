@@ -104,6 +104,17 @@ function read_set_5D(csv_path)
     end
     return collect(Set(slist))
 end
+
+function collect_set_dict5D(file_path)
+    set_= DataFrames.dropmissing(CSV.read(file_path,header=0), disallowmissing=true);
+    dict_ = Dict()
+    nrow,ncol = size(set_)
+    for row in 1:nrow
+        a = set_[row,1];b = set_[row,2];c = set_[row,3];d = set_[row,4];e = set_[row,5];
+        dict_["$(a)_$(b)_$(c)_$(d)_$(e)"] = true ;
+    end
+    return dict_
+end
     
 function collect_set_dict4D(file_path)
     set_= DataFrames.dropmissing(CSV.read(file_path,header=0), disallowmissing=true);

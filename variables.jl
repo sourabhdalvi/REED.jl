@@ -56,15 +56,16 @@ end
       samples:          3
       evals/sample:     1
     =#
-    
-    set_icrt = concat_sets(set_i2,set_c,set_rfeas,set_t);
+
+
+    set_icrt = concat_sets(set_i,set_c,set_rfeas_cap,set_t);
     variables["CAP"] = var_const(model,:CAP,set_icrt);
     variables["INV"] = var_const(model,:INV,set_icrt);
     variables["INVREFURB"] = var_const(model,:INVREFURB,set_icrt)
-    variables["EXTRA_PRESCRIP"] = var_const(model,:EXTRA_PRESCRIP,concat_sets(set_pcat,set_rfeas,set_t));
-    variables["INV_RSC"] = var_const(model,:INV_RSC,concat_sets(set_rsc_i,set_c,set_rfeas,set_t,set_rscbin));
+    variables["EXTRA_PRESCRIP"] = var_const(model,:EXTRA_PRESCRIP,concat_sets(set_pcat,set_rfeas_cap,set_t));
+    variables["INV_RSC"] = var_const(model,:INV_RSC,concat_sets(set_rsc_i,set_c,set_rfeas_cap,set_t,set_rscbin));
     
-    set_icrht = concat_sets(set_i2,set_c,set_rfeas,set_h,set_t);
+    set_icrht = concat_sets(set_i,set_c,set_rfeas_cap,set_h,set_t);
     variables["GEN"] = var_const(model,:GEN,set_icrht);
     variables["STORAGE_IN"] = var_const(model,:STORAGE_IN,set_icrht);
     variables["STORAGE_OUT"] = var_const(model,:STORAGE_OUT,set_icrht);

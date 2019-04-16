@@ -168,7 +168,9 @@ dict_m_refurb_cond = collect_set_dict4D("../GDX_data/Set_m_refurb_cond.csv");
 dict_cap_agg = collect_set_dict2D("../GDX_data/Set_cap_agg.csv");
 dict_routes = collect_set_dict4D("../GDX_data/Parm_routes.csv");
 dict_opres_routes = collect_set_dict3D("../GDX_data/Parm_opres_routes.csv");
-
+dict_maxload_szn = collect_set_dict4D("../GDX_data/Set_maxload_szn.csv");
+dict_RecMap = collect_set_dict5D("../GDX_data/Param_RecMap.csv");
+dict_RecTech = collect_set_dict4D("../GDX_data/Param_RecTech.csv");
 # set_retiretech =  Set([(i,c,r,t) for i in set_i, c in set_c, r in set_r, t in set_t 
                         # if  in(i,Set(["CoalOldScr","CoalOldUns","Gas-GG","Gas-CT"])) &  in(c,set_initc) & !in(i,set_ban_i)]);
 # set_inv_cond = Set([(i,c,t,tt) for i in set_i, c in set_newc, t in set_t, tt in set_t  
