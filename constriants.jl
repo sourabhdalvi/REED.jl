@@ -242,7 +242,7 @@ for i in (set_i2), r in (set_rfeas_cap), rscbin in (set_rscbin)
         
         valid_sum_1 = [ (ii,c,tt) for ii in (set_i2), c in (set_newc), tt in (set_t) 
                             if haskey(dict_valcap,"$(ii)_$(c)_$(r)_$(tt)")  & in((i,ii),set_rsc_agg) & haskey(param_resourcescaler,"$ii") ];
-        rhs_1 = !isempty(valid_sum_1) : sum([ variables["INV_RSC"][join((ii,c,r,tt,rscbin),"_")] for (ii,c,tt) in valid_sum_1 ]) : 0 ;
+        rhs_1 = !isempty(valid_sum_1) ? sum([ variables["INV_RSC"][join((ii,c,r,tt,rscbin),"_")] for (ii,c,tt) in valid_sum_1 ]) : 0 ;
         constraints["$(cons_name)"][join((i,r,rscbin),"_")] = JuMP.@constraint(model,
             param_m_rsc_dat["$(r)_$(i)_$(rscbin)_cap"]
             >=
