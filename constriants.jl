@@ -526,12 +526,13 @@ end
 # * --- OPERATING RESERVE CONSTRAINTS ---
 # *=======================================
 cons_name = "eq_ORCap"
-set_oricrht = concat_sets(set_ortype,set_i2,set_c,set_rfeas,set_h,set_t);
-constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, set_oricrht);
+temp_i = [ i for i in set_i2 if !in(i,set_storage) & !in(i,set_hydro_d)];
+temp_ori = [ (or,i) for or in (set_ortype), i in (temp_i) if haskey(param_reserve_frac,"$(i)_$(or)") ];
+constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, concat_sets(concat_sets(temp_ori),set_c,set_rfeas,set_h,set_t));
 
-for or in (set_ortype), i in (set_i2), c in (set_c), r in (set_rfeas), h in (set_h), t in (set_t)
-    
-    if haskey(param_reserve_frac,"$(i)_$(or)") & !in(i,set_storage) & haskey(dict_valcap,"$(i)_$(c)_$(r)_$(t)") & !in(i,set_hydro_d) #$SwM_OpRes
+
+for (or,i) in temp_ori, c in (set_c), r in (set_rfeas), h in (set_h), t in (set_t)
+    if  haskey(dict_valcap,"$(i)_$(c)_$(r)_$(t)")  #$SwM_OpRes
         
         val_sum_1 = [ (hh,szn) for (hh,szn) in set_h_szn if haskey(dict_maxload_szn,"$(r)_$(hh)_$(t)_$(szn)") ];
         lhs_1 = !isempty(val_sum_1) ? sum( [ variables["GEN"][join((i,c,r,hh,t),"_")] for (hh,szn) in val_sum_1 ]) : 0 ;
