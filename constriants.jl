@@ -146,7 +146,7 @@ end
 
 # eq_forceprescription
 cons_name = "eq_forceprescription"
-constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, concat_sets(set_pcat,set_rfeas,set_t));
+constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, concat_sets(set_pcat,set_rfeas_cap,set_t));
 
 
 for pcat in (set_pcat), r in (set_rfeas_cap), t in (set_t)
@@ -182,8 +182,25 @@ end
 # -----------------------------------------------------------------------
 
 # eq_neartermcaplimit
+cons_name = "eq_neartermcaplimit";
+constraints["$(cons_name)"] = JuMP.Containers.SparseAxisArray{JuMP.ConstraintRef}(undef, concat_sets(set_rfeas_cap,set_t) );
+for r in set_rfeas_cap, t in set_t 
+    val_cond_1 = (sum([1 for rr in set_rfeas_cap if haskey(param_near_term_cap_limits,"Wind_$(r)_$(t)")]) > 0 )
+    val_cond_2 = (sum([ 1 for i in set_i2, c in set_c if haskey(dict_valcap,"$(i)_$(c)_$(r)_$(t)") &  in(("Wind",i), set_tg_i)]) > 0) ; 
+    if   val_cond_1 > 0  & val_cond_2 # $SwM_NearTermLimits
+        constraints["$(cons_name)"][join((r, t),"_")] = JuMP.@constraint(model,
+        #LHS
+        get(param_near_term_cap_limits,"Wind_$(r)_$(t)",0) >=
+        #RHS
+        variables["EXTRA_PRESCRIP"][join(("wind-ons", r, t),"_")]
+        )  
+    end
+end
+
+# -----------------------------------------------------------------------
+
 cons_name = "eq_refurblim"
-constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, concat_sets(set_i2,set_rfeas,set_t));
+constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, concat_sets(set_i2,set_rfeas_cap,set_t));
 
 for i in (set_i2),  r in (set_rfeas_cap),  t in (set_t)
     if  in(i,set_refurbtech) # $SwM_Refurb
@@ -244,7 +261,7 @@ for i in (set_i2), r in (set_rfeas_cap), rscbin in (set_rscbin)
                             if haskey(dict_valcap,"$(ii)_$(c)_$(r)_$(tt)")  & in((i,ii),set_rsc_agg) & haskey(param_resourcescaler,"$ii") ];
         rhs_1 = !isempty(valid_sum_1) ? sum([ variables["INV_RSC"][join((ii,c,r,tt,rscbin),"_")] for (ii,c,tt) in valid_sum_1 ]) : 0 ;
         constraints["$(cons_name)"][join((i,r,rscbin),"_")] = JuMP.@constraint(model,
-            param_m_rsc_dat["$(r)_$(i)_$(rscbin)_cap"]
+            get(param_m_rsc_dat,"$(r)_$(i)_$(rscbin)_cap",0)
             >=
             rhs_1 # tmodel(tt) or tfix(tt)
         )
@@ -313,7 +330,7 @@ for i in (set_i2), c in (set_c), r in (set_rfeas), h in (set_h), t in (set_t)
         val_sum_1 = [ rr for rr in (set_rfeas) 
                         if haskey(dict_cap_agg,"$(r)_$(rr)") & haskey(dict_valcap,"$(i)_$(c)_$(r)_$(t)") & !haskey(param_cf_tech,i)];
         
-        val_sum_2 = [ rr for rr in (set_rfeas) 
+        val_sum_2 = [ rr for rr in (set_rfeas_cap) 
                         if ( haskey(dict_cap_agg,"$(r)_$(rr)") & haskey(dict_valcap,"$(i)_$(c)_$(r)_$(t)") & in(rr,set_rfeas_cap)
                         & haskey(param_cf_tech,i) & haskey(param_m_cf,"$(i)_$(c)_$(rr)_$(h)_$(t)") ) ];
         
@@ -337,8 +354,8 @@ end
 
 # eq_curt_gen_balance
 cons_name = "eq_curt_gen_balance"
-constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, concat_sets(set_rfeas_cap,set_h,set_t));
-for r in (set_rfeas_cap) , h in (set_h), t in (set_t)
+constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, concat_sets(set_rfeas,set_h,set_t));
+for r in (set_rfeas) , h in (set_h), t in (set_t)
         
     val_sum_1 = [ (i,c,rr) for i in (set_vre), c in (set_c), rr in (set_rfeas_cap) 
                     if (haskey(dict_cap_agg,"$(r)_$(rr)") & haskey(dict_valcap,"$(i)_$(c)_$(r)_$(t)") 
@@ -413,9 +430,9 @@ end
 
 cons_name = "eq_mingen_ub";
 temp_h_szn = [join(collect(tup),"_") for tup in set_h_szn];
-constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, concat_sets(set_rfeas_cap,temp_h_szn,set_t));
+constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef, concat_sets(set_rfeas,temp_h_szn,set_t));
 
-for r in set_rfeas_cap, (h ,szn) in set_h_szn, t in set_t
+for r in set_rfeas, (h ,szn) in set_h_szn, t in set_t
     val_sum_1 = [ (i,c) for i in (set_i2), c in (set_c) 
                     if haskey(dict_valcap,"$(i)_$(c)_$(r)_$(t)")  & haskey(param_minloadfrac,"$r"*"_"*"$i"*"_"*"$h") ];
     rhs_1 = !isempty(val_sum_1) ? sum([ variables["GEN"][join((i,c,r,h,t),"_")] for (i,c) in val_sum_1 ]) : 0 ;
@@ -638,15 +655,15 @@ for r in (set_rfeas), szn in (set_szn), t in (set_t) #SwM_ReserveMargin
 
     val_sum_1 = [ (i,c) for i in (set_i2), c in (set_c) if haskey(dict_valcap,"$(i)_$(c)_$(r)_$(t)") & !in(i,set_rsc_i) & !in(i,set_storage)] ;
 
-    val_sum_2 = [ (i,rr) for i in (set_i2), rr in (set_rfeas) if ( (in(i,set_vre) | in(i,set_storage)) & haskey(dict_cap_agg,"$(r)_$(rr)") )];
+    val_sum_2 = [ (i,rr) for i in (set_i2), rr in (set_rfeas_cap) if ( (in(i,set_vre) | in(i,set_storage)) & haskey(dict_cap_agg,"$(r)_$(rr)") )];
 
-    val_sum_3 = [ (i,c,rr) for i in (set_i2), c in (set_c), rr in (set_rfeas)
+    val_sum_3 = [ (i,c,rr) for i in (set_i2), c in (set_c), rr in (set_rfeas_cap)
                     if ( haskey(dict_cap_agg,"$(r)_$(rr)") & (in(i,set_vre) | in(i,set_storage)) 
                         & haskey(dict_valcap,"$(i)_$(c)_$(r)_$(t)") & haskey(dict_ict,"$(i)_$(c)_$(t)") & haskey(dict_inv_cond,"$(i)_$(c)_$(t)_$(t)") ) ];
 
     val_sum_4 = [ c for c in (set_c) if haskey(dict_valcap,"distpv_$(c)_$(r)_$(t)") & in((t-2),set_t)];
 
-    val_sum_5 = [ (i,c,r) for i in (set_i2), c in (set_c), rr in (set_rfeas)
+    val_sum_5 = [ (i,c,r) for i in (set_i2), c in (set_c), rr in (set_rfeas_cap)
                     if ((in(i,set_vre) | in(i,set_storage)) & haskey(dict_valcap,"$(i)_$(c)_$(rr)_$(t)")  & haskey(dict_cap_agg,"$(r)_$(rr)"))];
 
     val_sum_6 = [ (i,c) for i in (set_hydro_nd), c in (set_c) if haskey(dict_valcap,"$(i)_$(c)_$(r)_$(t)") ];
@@ -1157,7 +1174,7 @@ constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}
 
 for i in (set_csp_storage), c in (set_c), r in (set_rfeas), h in (set_h), t in (set_t)
     if haskey(dict_valcap,"$(i)_$(c)_$(r)_$(t)")  
-        val_sum_1 = [ rr for rr in (set_rfeas) if haskey(dict_cap_agg,"$(r)_$(rr)" ) & haskey(dict_valcap,"$(i)_$(c)_$(r)_$(t)") ];
+        val_sum_1 = [ rr for rr in (set_rfeas_cap) if haskey(dict_cap_agg,"$(r)_$(rr)" ) & haskey(dict_valcap,"$(i)_$(c)_$(r)_$(t)") ];
         
         lhs_1 = !isempty(val_sum_1)  ? sum([ variables["CAP"][join((i,c,r,t),"_")]*param_csp_sm["$i"]* param_m_cf["$(i)_$(c)_$(rr)_$(t)"] for rr in val_sum_1 ])  :  0 ;
         
