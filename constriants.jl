@@ -242,11 +242,11 @@ for i in (set_i2), r in (set_rfeas_cap), rscbin in (set_rscbin)
         
         valid_sum_1 = [ (ii,c,tt) for ii in (set_i2), c in (set_newc), tt in (set_t) 
                             if haskey(dict_valcap,"$(ii)_$(c)_$(r)_$(tt)")  & in((i,ii),set_rsc_agg) & haskey(param_resourcescaler,"$ii") ];
-        
+        rhs_1 = !isempty(valid_sum_1) : sum([ variables["INV_RSC"][join((ii,c,r,tt,rscbin),"_")] for (ii,c,tt) in valid_sum_1 ]) : 0 ;
         constraints["$(cons_name)"][join((i,r,rscbin),"_")] = JuMP.@constraint(model,
             param_m_rsc_dat["$(r)_$(i)_$(rscbin)_cap"]
             >=
-            sum([ variables["INV_RSC"][join((ii,c,r,tt,rscbin),"_")] for (ii,c,tt) in valid_sum_1 ]) # tmodel(tt) or tfix(tt)
+            rhs_1 # tmodel(tt) or tfix(tt)
         )
     end
 end
@@ -457,12 +457,14 @@ for i in (set_hydro_d),c in (set_c), r in (set_rfeas), szn in (set_szn), t in (s
         val_sum_1 = [ or for or in (set_ortype) if haskey(param_reserve_frac,"$(i)_$(or)")];
         
         inner_sum(h) = !isempty(val_sum_1) ? sum([ variables["OPRES"][join((or,i,c,r,h,t),"_")] for or in val_sum_1]) : 0 ;
-         
+        lhs_1 = !isempty(val_sum_0) ? sum([ param_hours["$h"]*param_outage["$(i)_$(h)"] for h in val_sum_0 ]) : 0 ;
+
+        rhs_1 = !isempty(val_sum_0) ? sum([( variables["GEN"][join((i,c,r,h,t),"_")] + inner_sum(h)) for h in val_sum_0 ]) : 0 ;
         constraints["$(cons_name)"][join((i,c,r,szn,t),"_")] = JuMP.@constraint(model,
             
-            sum([ param_hours["$h"]*param_outage["$(i)_$(h)"] for h in val_sum_0 ])
+            lhs_1
             >= 
-            sum([( variables["GEN"][join((i,c,r,h,t),"_")] + inner_sum(h)) for h in val_sum_0 ])
+            rhs_1
         )
     end
 end
@@ -615,10 +617,10 @@ for r in (set_rfeas), rr in (set_rfeas), szn in (set_szn), t in (set_t)
     if (sum([ 1 for tr in set_trtype if haskey(dict_routes,"$(r)_$(rr)_$(tr)_$(t)")]) > 0) # SwM_ReserveMargin
         
         val_sum_1 = [ tr for tr in (set_trtype) if haskey(dict_routes,"$(r)_$(rr)_$(tr)_$(t)")];
-        
+        lhs_1 = !isempty(val_sum_1) ? sum([ variables["CAPTRAN"][join((r,rr,t,tr),"_")] for tr in val_sum_1 ]) : 0 ;
         constraints["$(cons_name)"][join((r,rr,szn,t),"_")] = JuMP.@constraint(model,
             
-            sum([ variables["CAPTRAN"][join((r,rr,t,tr),"_")] for tr in val_sum_1 ])
+            lhs_1
             >=
             variables["PRMTRADE"][join((r,rr,szn,t),"_")]
         );
@@ -700,12 +702,13 @@ for r in (set_rfeas), rr in (set_rfeas), trtype in (set_trtype), t in (set_t)
     if haskey(dict_routes,"$(r)_$(rr)_$(trtype)_$(t)") & (t<= 2020)
         val_sum_1 = [ tt  for tt in set_t if (tt <= t)];
         val_sum_2 = [ tt for tt in (set_t) if (tt <= t)];
-        
+    
+        lhs_1 = !isempty(val_sum_1) ? sum([ get(param_futuretran,"$(r)_$(rr)_possible_$(tt)_$(trtype)",0) + get(param_futuretran,"$(rr)_$(r)_possible_$(tt)_$(trtype)",0) for tt in val_sum_1 ]) : 0 ;
+        rhs_1 = !isempty(val_sum_2) ? sum([ variables["INVTRAN"][join((r,rr,tt,trtype),"_")] + variables["INVTRAN"][join((rr,r,tt,trtype),"_")] for tt in val_sum_2 ]) : 0 ;
         constraints["$(cons_name)"][join((r,rr,trtype,t),"_")] = JuMP.@constraint(model,
-            sum([ get(param_futuretran,"$(r)_$(rr)_possible_$(tt)_$(trtype)",0) + get(param_futuretran,"$(rr)_$(r)_possible_$(tt)_$(trtype)",0)
-                    for tt in val_sum_1 ])
+            lhs_1
             >=
-            sum([ variables["INVTRAN"][join((r,rr,tt,trtype),"_")] + variables["INVTRAN"][join((rr,r,tt,trtype),"_")] for tt in val_sum_2 ])
+            rhs_2
         )
     end
 end
@@ -719,11 +722,14 @@ for r in (set_rfeas), t in (set_t)
     val_sum_1 = [ vc for vc in set_vc if in((r,vc),set_tranfeas)]; 
     val_sum_2 = [rr for rr in (set_rfeas) if haskey(dict_routes,"$(r)_$(rr)_AC_$(t)")];
     val_sum_3 = [rr for rr in (set_rfeas) if haskey(dict_routes,"$(r)_$(rr)_AC_$(t)")];
+
+    lhs_1 = !isempty(val_sum_1) ? sum([ variables["INVSUBSTATION"][join((r,vc,t),"_")] for vc in val_sum_1]) : 0 ;
+    rhs_1 = !isempty(val_sum_2) ? sum([variables["INVTRAN"][join((rr,r,t,"AC"),"_")] for rr in val_sum_2 ])  : 0 ;
+    rhs_2 = !isempty(val_sum_3) ? sum([variables["INVTRAN"][join((r,rr,t,"AC"),"_")] for rr in val_sum_3 ]) : 0 ;
     constraints["$(cons_name)"][join((r,t),"_")] = JuMP.@constraint(model,
-        sum([ variables["INVSUBSTATION"][join((r,vc,t),"_")] for vc in val_sum_1])
+        lhs_1
         ==
-        sum([variables["INVTRAN"][join((rr,r,t,"AC"),"_")] for rr in val_sum_2 ]) 
-        + sum([variables["INVTRAN"][join((r,rr,t,"AC"),"_")] for rr in val_sum_3 ])
+        rhs_1 + rhs_2
     )
 end
 
@@ -734,6 +740,7 @@ constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}
 
 for r in (set_rfeas), vc in (set_vc)
     if in((r,vc),set_tranfeas)
+
         constraints["$(cons_name)"][join((r,vc),"_")] = JuMP.@constraint(model,
 
             get(param_trancost,"$(r)_CAP_$(vc)",0)
@@ -754,11 +761,12 @@ for r in (set_rfeas), rr in (set_rfeas), h in (set_h), t in (set_t), trtype in (
        
         val_sum_1 = [ortype for ortype in (set_ortype) if (trtype =="AC") & haskey(dict_opres_routes,"$(r)_$(rr)_$(t)") ];
         
+        rhs_1 = !isempty(val_sum_1) ? sum( [ variables["OPRES_FLOW"][join((ortype,r,rr,h,t),"_")] for ortype in val_sum_1 ]) : 0 ;
         constraints["$(cons_name)"][join((r,rr,h,t,trtype),"_")] = JuMP.@constraint(model,  
             variables["CAPTRAN"][join((r,rr,t,trtype),"_")]
             >=
             variables["FLOW"][join((r,rr,h,t,trtype),"_")]
-            + sum( [ variables["OPRES_FLOW"][join((ortype,r,rr,h,t),"_")] for ortype in val_sum_1 ])
+            + rhs_1
         )
     end
 end
@@ -854,20 +862,15 @@ constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}
 
 for e in (set_e), r in (set_rfeas), t in (set_t)
     if (t >= CarbPolicyStartyear)  # missing & param_emit_rate_con["$(e)_$(r)_$(t)"]
-        val_sum_1 = [ (i,c,h) for i in (set_i2), c in (set_c), h in (set_h) 
-                        if haskey(dict_valcap,"$(i)_$(c)_$(r)_$(t)") & !in(i,set_cofire)];
-        
+        val_sum_1 = [ (i,c,h) for i in (set_i2), c in (set_c), h in (set_h) if haskey(dict_valcap,"$(i)_$(c)_$(r)_$(t)") & !in(i,set_cofire)];
+
+        lhs_1 = !isempty(val_sum_1) ? sum([ param_hours["$h"]*variables["GEN"][join((i,c,r,h,t),"_")]  for (i,c,h) in val_sum_1]) : 0 ; 
+        lhs_2 = !isempty(val_sum_1) ? sum([ (1-bio_cofire_perc)*param_hours["$h"]*variables["GEN"][join((i,c,r,h,t),"_")] for (i,c,h) in val_sum_1 ]) : 0 ;
+             
         constraints["$(cons_name)"][join((e,r,t),"_")] = JuMP.@constraint(model,
             
-            param_emit_rate_limit["$(e)_$(r)_$(t)"]*(
-                
-            sum([ param_hours["$h"]*variables["GEN"][join((i,c,r,h,t),"_")]  
-                        for (i,c,h) in val_sum_1])
-            
-            + sum([ (1-bio_cofire_perc)*param_hours["$h"]*variables["GEN"][join((i,c,r,h,t),"_")] 
-                    for (i,c,h) in val_sum_1 ]))
+            param_emit_rate_limit["$(e)_$(r)_$(t)"]*( lhs_1 + lhs_2 )
             >=
-            
             variables["EMIT"][join((e,r,t),"_")] 
         )
     end
@@ -903,12 +906,14 @@ constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}
 
 for st in (set_st), t in (set_t)
     if (st=="TX") & haskey(param_offshore_cap_req,"$(st)_$(t)")
-        val_sum_1 = [ (i,c,rr) for i in (set_i2), c in (set_c), rr in (set_r)  if haskey(dict_valcap,"$(i)_$(c)_$(r)_$(t)") ];
-        val_sum_2 = [  r for r in (set_r) if in((r,st),set_r_st)];
+        val_sum_1 = [ (i,c,rr,r) for i in set_i2, c in set_c, rr in set_rfeas , r in set_rfeas 
+                        if haskey(dict_valcap,"$(i)_$(c)_$(r)_$(t)") & in((r,st),set_r_st) & haskey(dict_cap_agg,"$(r)_$(rr)") ];
         
+        lhs_1 = !isempty(val_sum_1) ? sum([ variables["CAP"][join((i,c,rr,t),"_")] for (i,c,rr) in val_sum_1 ]) : 0 ;
+
         constraints["$(cons_name)"][join((st,t),"_")] = JuMP.@constraint(model,
             
-            sum([ sum([ variables["CAP"][join((i,c,rr,t),"_")] for (i,c,rr) in val_sum_1 ]) for r in val_sum_2 ])
+            lhs_1
             >=
             get(param_offshore_cap_req,"$(st)_$(t)",0)
         )
@@ -931,21 +936,17 @@ for t in set_t
                             if haskey(dict_valcap,"$(i)_$(c)_$(r)_$(t)") & !in(i,set_csp_storage)];
         val_sum_0 =  [ (i,c,r,h) for i in (set_re), c in (set_c), r in (set_rfeas), h in (set_h) if haskey(dict_valcap,"$(i)_$(c)_$(r)_$(t)") ];
         
+        lhs_1 = !isempty(val_sum_0) ? sum([ variables["GEN"][join((i,c,r,h,t),"_")]* param_hours["$h"] for (i,c,r,h) in val_sum_0 ]) : 0 ;
+        rhs_1 = !isempty(val_sum_1) ? sum([ variables["LOAD"][join((r,h,t),"_")]*param_hours["$h"] for (r,h) in val_sum_1 ]) : 0 ;
+        rhs_2 = !isempty(val_sum_2) ? sum([ param_tranloss["$(rr)_$(r)"]*variables["FLOW"][join((rr,r,h,t,trtype),"_")]*param_hours["$h"] for (rr,r,h,trtype) in val_sum_2]) : 0 ;
+        rhs_3 = !isempty(val_sum_3) ? sum([ variables["STORAGE_IN"][join((i,c,r,h,t),"_")]*param_hours["$h"] for (i,c,r,h) in val_sum_3 ])  : 0 ;
+        rhs_4 = !isempty(val_sum_4) ? sum([ variables["STORAGE_OUT"][join((i,c,r,h,t),"_")]*param_hours["$h"] for (i,c,r,h) in val_sum_4 ]) : 0 ;
         constraints["$(cons_name)"][t] = JuMP.@constraint(model,
             
-            sum([ variables["GEN"][join((i,c,r,h,t),"_")]* param_hours["$h"] for (i,c,r,h) in val_sum_0 ])
+            lhs_1
             + 0 #geothermal
             >=
-            param_national_rps_frac[t]*(
-                
-            sum([ variables["LOAD"][join((r,h,t),"_")]*param_hours["$h"] for (r,h) in val_sum_1 ])
-                
-            + sum([ param_tranloss["$(rr)_$(r)"]*variables["FLOW"][join((rr,r,h,t,trtype),"_")]*param_hours["$h"] for (rr,r,h,trtype) in val_sum_2])
-                
-            + sum([ variables["STORAGE_IN"][join((i,c,r,h,t),"_")]*param_hours["$h"] for (i,c,r,h) in val_sum_3 ]) 
-                
-            + sum([ variables["STORAGE_OUT"][join((i,c,r,h,t),"_")]*param_hours["$h"] for (i,c,r,h) in val_sum_4 ])
-            )
+            param_national_rps_frac[t]*(rhs_1 + rhs_2 + rhs_3 + rhs_4)
         );
     end
 end
@@ -981,11 +982,13 @@ for cendiv in (set_cendiv), gb in (set_gb), t in (set_t)
     if (cendiv == "WSC")
         val_sum_1 = [ gps for gps in set_gps if (gps=="REF") ];
         
+        lhs_1 = !isempty(val_sum_1) ? sum([ param_gaslimit["$(cendiv)_$(gb)_$(t)_$(gps)"] for gps in val_sum_1]) : 0 ;
+        rhs_1 = !isempty(set_h) ? sum([ param_hours["$h"]*variables["GasUsed"][join((cendiv,gb,h,t),"_")] for h in (set_h)]) : 0 ;
         constraints["$(cons_name)"][join((cendiv,gb,t),"_")] = JuMP.@constraint(model,
             
-            sum([ param_gaslimit["$(cendiv)_$(gb)_$(t)_$(gps)"] for gps in val_sum_1])
+            lhs_1
             >=
-            sum([ param_hours["$h"]*variables["GasUsed"][join((cendiv,gb,h,t),"_")] for h in (set_h)])
+            rhs_1
         )
     end
 end
@@ -999,10 +1002,11 @@ constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}
 for gb in (set_gb), t in (set_t)
     
     val_sum_2 = [ (h,cendiv) for h in (set_h), cendiv in (set_cendiv)  if cendiv == "WSC"]
+    rhs_1 = !isempty(val_sum_2) ? sum([ variables["GasUsed"][join((cendiv,gb,h,t),"_")]*param_hours["$h"] for (h,cendiv) in val_sum_2 ]) : 0 ;
     constraints["eq_gasbinlimit_nat"]["$(gb)_$(t)"] = JuMP.@constraint(model,
         param_gaslimit_nat["$(gb)_$(t)_REF"] 
         >=
-        sum([ variables["GasUsed"][join((cendiv,gb,h,t),"_")]*param_hours["$h"] for (h,cendiv) in val_sum_2 ])
+        rhs_1
     )
 end
 
@@ -1130,13 +1134,15 @@ for i in (set_storage), c in (set_c),r in (set_rfeas), h in (set_h), t in (set_t
         val_sum_1 = !in(i,set_csp_storage) ? variables["STORAGE_IN"][join((i,c,r,h,t),"_")] : 0;
         val_sum_0 = [ rr for rr in (set_rfeas_cap) if haskey(dict_valcap,"$(i)_$(c)_$(r)_$(t)")  & haskey(dict_cap_agg,"$(r)_$(rr)")];
         
+        lhs_1 = !isempty(val_sum_0) ? sum([ variables["CAP"][join((i,c,rr,t),"_")]*param_outage["$(i)_$(h)"] for rr in val_sum_0 ]) : 0 ;
+        rhs_1 = !isempty(val_sum_2) ? sum([ variables["OPRES"][join((ortype,i,c,r,h,t),"_")] for ortype in val_sum_2 ]) : 0 ;
         constraints["$(cons_name)"][join((i,c,r,h,t),"_")] = JuMP.@constraint(model,
             
-            sum([ variables["CAP"][join((i,c,rr,t),"_")]*param_outage["$(i)_$(h)"] for rr in val_sum_0 ])
+            lhs_1
             >=
             variables["STORAGE_OUT"][join((i,c,r,h,t),"_")]
             + val_sum_1
-            + sum([ variables["OPRES"][join((ortype,i,c,r,h,t),"_")] for ortype in val_sum_2 ])
+            + rhs_1
         )
     end
 end
@@ -1242,9 +1248,9 @@ for i in (set_batcsp), c in (set_c), r in (set_rfeas), h in (set_h),t in (set_t)
         val_sum_1 = [ rr for rr in (set_rfeas_cap) if haskey(dict_valcap,"$(i)_$(c)_$(r)_$(t)") & haskey(dict_cap_agg,"$(r)_$(rr)") ];
         rhs_1 = !in(i,set_csp_storage) ? variables["STORAGE_IN"][join((i,c,r,h,t),"_")]*param_hours["$h"]/sum([param_numdays["$szn"] for szn in set_szn if in((h,szn),set_h_szn) ]) : 0;
         rhs_2 = in(i,set_csp_storage) ? variables["STORAGE_LEVEL"][join((i,c,r,h,t),"_")] : 0;
-        
+        lhs_1 = !isempty(val_sum_1) ? sum([ param_storage_duration["$i"]*variables["CAP"][join((i,c,rr,t),"_")] for rr in val_sum_1 ]) : 0 ;
         constraints["$(cons_name)"][join((i,c,r,h,t),"_")] = JuMP.@constraint(model,
-            sum([ param_storage_duration["$i"]*variables["CAP"][join((i,c,rr,t),"_")] for rr in val_sum_1 ])
+            lhs_1
             >=
             rhs_1
             +  rhs_2
