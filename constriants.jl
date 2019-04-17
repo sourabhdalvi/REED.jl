@@ -237,7 +237,7 @@ for i in (set_rsc_i), c in (set_newc), r in (set_rfeas), t in (set_t)
     if  haskey(dict_valcap,"$(i)_$(c)_$(r)_$(t)") 
         
         valid_sum_1 = [rscbin for rscbin in (set_rscbin) if haskey(param_m_rscfeas,"$(r)_$(i)_$(rscbin)")];
-        lhs_1 = !isempty(valid_sum_1) ? sum([ variables["INV_RSC"][join((i,c,r,t,rsc),"_")] for rsc in valid_sum_1 ]) : 0 ;
+        lhs_1 = !isempty(valid_sum_1) ? sum([ variables["INV_RSC"][join((i,c,r,rsc,t),"_")] for rsc in valid_sum_1 ]) : 0 ;
        constraints["$(cons_name)"][join((i,c,r,t),"_")] = JuMP.@constraint(model,
             #LHS
             lhs_1
@@ -259,7 +259,7 @@ for i in (set_i2), r in (set_rfeas_cap), rscbin in (set_rscbin)
         
         valid_sum_1 = [ (ii,c,tt) for ii in (set_i2), c in (set_newc), tt in (set_t) 
                             if haskey(dict_valcap,"$(ii)_$(c)_$(r)_$(tt)")  & in((i,ii),set_rsc_agg) & haskey(param_resourcescaler,"$ii") ];
-        rhs_1 = !isempty(valid_sum_1) ? sum([ variables["INV_RSC"][join((ii,c,r,tt,rscbin),"_")] for (ii,c,tt) in valid_sum_1 ]) : 0 ;
+        rhs_1 = !isempty(valid_sum_1) ? sum([ variables["INV_RSC"][join((ii,c,r,rscbin,tt),"_")] for (ii,c,tt) in valid_sum_1 ]) : 0 ;
         constraints["$(cons_name)"][join((i,r,rscbin),"_")] = JuMP.@constraint(model,
             get(param_m_rsc_dat,"$(r)_$(i)_$(rscbin)_cap",0)
             >=
@@ -309,7 +309,7 @@ for tg in (set_tg), t in (set_t)
         val_sum_2 = [ (i,c,r,rscbin) for i in (set_i2), c in (set_c), r in (set_rfeas_cap), rscbin in (set_rscbin) 
                         if in((tg,i),set_tg_i) & haskey(dict_inv_cond,"$(i)_$(c)_$(t)_$(t)") & haskey(param_m_rscfeas,"$(r)_$(i)_$(rscbin)") ];
         lhs_1 = !isempty(val_sum_1) ? (sum([ tt for tt in val_sum_1 ]) - t) : 0 ;
-        rhs_1 = !isempty(val_sum_2) ? sum([ variables["INV_RSC"][join((i,c,r,t,rscbin),"_")] for (i,c,r,rscbin) in val_sum_2 ]) : 0 ;
+        rhs_1 = !isempty(val_sum_2) ? sum([ variables["INV_RSC"][join((i,c,r,rscbin,t),"_")] for (i,c,r,rscbin) in val_sum_2 ]) : 0 ;
         
         constraints["$(cons_name)"][join((t,tg),"_")] = JuMP.@constraint(model,
             param_growth_limit_relative["$tg"]*lhs_1
@@ -506,8 +506,8 @@ for r in (set_rfeas), h in (set_h), t in (set_t)
     val_sum_4 = [ (i,c) for i in  (set_storage), c in (set_c) if haskey(dict_valcap,"$(i)_$(c)_$(r)_$(t)") & !in(i,set_csp_storage) ];
     
     lhs_1 = !isempty(val_sum_0) ? sum([ variables["GEN"][join((i,c,r,h,t),"_")] for (i,c) in val_sum_0 ])  : 0 ;
-    lhs_2 = !isempty(val_sum_1) ? sum( [ (1-param_tranloss["$(rr)_$(r)"])* variables["FLOW"][join((rr,r,h,t,tr),"_")] for (rr,tr) in val_sum_1 ]) : 0 ;
-    lhs_3 = !isempty(val_sum_2) ? sum( [ variables["FLOW"][join((r,rr,h,t,tr),"_")] for (rr,tr) in val_sum_2 ])  : 0 ;
+    lhs_2 = !isempty(val_sum_1) ? sum( [ (1-param_tranloss["$(rr)_$(r)"])* variables["FLOW"][join((rr,r,h,tr,t),"_")] for (rr,tr) in val_sum_1 ]) : 0 ;
+    lhs_3 = !isempty(val_sum_2) ? sum( [ variables["FLOW"][join((r,rr,h,tr,t),"_")] for (rr,tr) in val_sum_2 ])  : 0 ;
     lhs_4 = !isempty(val_sum_3) ? sum( [ variables["STORAGE_OUT"][join((i,c,r,h,t),"_")] for (i,c) in val_sum_3 ])  : 0 ;# SwM_Storage 
     lhs_5 = !isempty(val_sum_4) ? sum( [ variables["STORAGE_IN"][join((i,c,r,h,t),"_")] for (i,c) in val_sum_4 ])   : 0 ;# SwM_Storage
     
@@ -636,7 +636,7 @@ for r in (set_rfeas), rr in (set_rfeas), szn in (set_szn), t in (set_t)
     if (sum([ 1 for tr in set_trtype if haskey(dict_routes,"$(r)_$(rr)_$(tr)_$(t)")]) > 0) # SwM_ReserveMargin
         
         val_sum_1 = [ tr for tr in (set_trtype) if haskey(dict_routes,"$(r)_$(rr)_$(tr)_$(t)")];
-        lhs_1 = !isempty(val_sum_1) ? sum([ variables["CAPTRAN"][join((r,rr,t,tr),"_")] for tr in val_sum_1 ]) : 0 ;
+        lhs_1 = !isempty(val_sum_1) ? sum([ variables["CAPTRAN"][join((r,rr,tr,t),"_")] for tr in val_sum_1 ]) : 0 ;
         constraints["$(cons_name)"][join((r,rr,szn,t),"_")] = JuMP.@constraint(model,
             
             lhs_1
@@ -701,10 +701,10 @@ constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}
 for r in (set_rfeas),rr in (set_rfeas), trtype in (set_trtype),t in (set_t)
     if haskey(dict_routes,"$(r)_$(rr)_$(trtype)_$(t)")
         val_sum_1 = [ tt  for tt in (set_t) if (tt <= t) & (tt > 2020) & (param_INr["$r"] == param_INr["$rr"])];
-        rhs_1 = !isempty(val_sum_1) ? sum([ variables["INVTRAN"][join((rr,r,tt,trtype),"_")] + variables["INVTRAN"][join((r,rr,tt,trtype),"_")] 
+        rhs_1 = !isempty(val_sum_1) ? sum([ variables["INVTRAN"][join((rr,r,trtype,tt),"_")] + variables["INVTRAN"][join((r,rr,trtype,tt),"_")] 
                     for tt in val_sum_1 ]) : 0 ;
         constraints["$(cons_name)"][join((r,rr,trtype,t),"_")] = JuMP.@constraint(model,
-            variables["CAPTRAN"][join((r,rr,t,trtype),"_")]
+            variables["CAPTRAN"][join((r,rr,trtype,t),"_")]
             ==
             param_trancap_exog["$(r)_$(rr)_$(trtype)_$(t)"]
             + rhs_1
@@ -723,7 +723,7 @@ for r in (set_rfeas), rr in (set_rfeas), trtype in (set_trtype), t in (set_t)
         val_sum_2 = [ tt for tt in (set_t) if (tt <= t)];
     
         lhs_1 = !isempty(val_sum_1) ? sum([ get(param_futuretran,"$(r)_$(rr)_possible_$(tt)_$(trtype)",0) + get(param_futuretran,"$(rr)_$(r)_possible_$(tt)_$(trtype)",0) for tt in val_sum_1 ]) : 0 ;
-        rhs_1 = !isempty(val_sum_2) ? sum([ variables["INVTRAN"][join((r,rr,tt,trtype),"_")] + variables["INVTRAN"][join((rr,r,tt,trtype),"_")] for tt in val_sum_2 ]) : 0 ;
+        rhs_1 = !isempty(val_sum_2) ? sum([ variables["INVTRAN"][join((r,rr,trtype,tt),"_")] + variables["INVTRAN"][join((rr,r,trtype,tt),"_")] for tt in val_sum_2 ]) : 0 ;
         constraints["$(cons_name)"][join((r,rr,trtype,t),"_")] = JuMP.@constraint(model,
             lhs_1
             >=
@@ -743,8 +743,8 @@ for r in (set_rfeas), t in (set_t)
     val_sum_3 = [rr for rr in (set_rfeas) if haskey(dict_routes,"$(r)_$(rr)_AC_$(t)")];
 
     lhs_1 = !isempty(val_sum_1) ? sum([ variables["INVSUBSTATION"][join((r,vc,t),"_")] for vc in val_sum_1]) : 0 ;
-    rhs_1 = !isempty(val_sum_2) ? sum([variables["INVTRAN"][join((rr,r,t,"AC"),"_")] for rr in val_sum_2 ])  : 0 ;
-    rhs_2 = !isempty(val_sum_3) ? sum([variables["INVTRAN"][join((r,rr,t,"AC"),"_")] for rr in val_sum_3 ]) : 0 ;
+    rhs_1 = !isempty(val_sum_2) ? sum([variables["INVTRAN"][join((rr,r,"AC",t),"_")] for rr in val_sum_2 ])  : 0 ;
+    rhs_2 = !isempty(val_sum_3) ? sum([variables["INVTRAN"][join((r,rr,"AC",t),"_")] for rr in val_sum_3 ]) : 0 ;
     constraints["$(cons_name)"][join((r,t),"_")] = JuMP.@constraint(model,
         lhs_1
         ==
@@ -782,9 +782,9 @@ for r in (set_rfeas), rr in (set_rfeas), h in (set_h), t in (set_t), trtype in (
         
         rhs_1 = !isempty(val_sum_1) ? sum( [ variables["OPRES_FLOW"][join((ortype,r,rr,h,t),"_")] for ortype in val_sum_1 ]) : 0 ;
         constraints["$(cons_name)"][join((r,rr,h,t,trtype),"_")] = JuMP.@constraint(model,  
-            variables["CAPTRAN"][join((r,rr,t,trtype),"_")]
+            variables["CAPTRAN"][join((r,rr,trtype,t),"_")]
             >=
-            variables["FLOW"][join((r,rr,h,t,trtype),"_")]
+            variables["FLOW"][join((r,rr,h,trtype,t),"_")]
             + rhs_1
         )
     end
@@ -844,7 +844,7 @@ for t in (set_t)
         val_sum_2 = [ (h,r,rr,trtype) for h in (set_h),r in (set_rfeas), rr in (set_AB32_r), trtype in (set_trtype) 
                         if !in(r,set_AB32_r)  & haskey(dict_routes,"$(r)_$(rr)_$(trtype)_$(t)") ];
         rhs_1 = !isempty(val_sum_1) ? sum([variables["EMIT"][join(("CO2",r,t),"_")] for r in (val_sum_1) ]) : 0 ;   # "CO2" => 1
-        rhs_2 = !isempty(val_sum_2) ? sum([ param_hours["$h"]*AB32_Import_Emit* variables["FLOW"][join((r,rr,h,t,trtype),"_")]
+        rhs_2 = !isempty(val_sum_2) ? sum([ param_hours["$h"]*AB32_Import_Emit* variables["FLOW"][join((r,rr,h,trtype,t),"_")]
                     for (h,r,rr,trtype) in val_sum_2 ]) : 0 ; 
         
         
@@ -957,7 +957,7 @@ for t in set_t
         
         lhs_1 = !isempty(val_sum_0) ? sum([ variables["GEN"][join((i,c,r,h,t),"_")]* param_hours["$h"] for (i,c,r,h) in val_sum_0 ]) : 0 ;
         rhs_1 = !isempty(val_sum_1) ? sum([ variables["LOAD"][join((r,h,t),"_")]*param_hours["$h"] for (r,h) in val_sum_1 ]) : 0 ;
-        rhs_2 = !isempty(val_sum_2) ? sum([ param_tranloss["$(rr)_$(r)"]*variables["FLOW"][join((rr,r,h,t,trtype),"_")]*param_hours["$h"] for (rr,r,h,trtype) in val_sum_2]) : 0 ;
+        rhs_2 = !isempty(val_sum_2) ? sum([ param_tranloss["$(rr)_$(r)"]*variables["FLOW"][join((rr,r,h,trtype,t),"_")]*param_hours["$h"] for (rr,r,h,trtype) in val_sum_2]) : 0 ;
         rhs_3 = !isempty(val_sum_3) ? sum([ variables["STORAGE_IN"][join((i,c,r,h,t),"_")]*param_hours["$h"] for (i,c,r,h) in val_sum_3 ])  : 0 ;
         rhs_4 = !isempty(val_sum_4) ? sum([ variables["STORAGE_OUT"][join((i,c,r,h,t),"_")]*param_hours["$h"] for (i,c,r,h) in val_sum_4 ]) : 0 ;
         constraints["$(cons_name)"][t] = JuMP.@constraint(model,
