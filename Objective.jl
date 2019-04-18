@@ -40,7 +40,7 @@ for t in set_t
         end
         for rscbin in set_rscbin
             if in(i,set_rsc_i) & haskey(param_m_rscfeas,"$(r)_$(i)_$(rscbin)") & haskey(dict_valcap,join((i,c,r,t),"_"))
-                cost_ = variables["INV_RSC"][join((i,c,r,t,rscbin),"_")] * param_m_rsc_dat["$(r)_$(i)_$(rscbin)_cost"];
+                cost_ = variables["INV_RSC"][join((i,c,r,rscbin,t),"_")] * param_m_rsc_dat["$(r)_$(i)_$(rscbin)_cost"];
                 JuMP.add_to_expression!(cost_func,cost_);
             end
         end
@@ -48,12 +48,12 @@ for t in set_t
     for r in set_rfeas,rr in set_rfeas
         for trtype in set_trtype
             if haskey(dict_routes,join((r,rr,trtype,t),"_")) # costs of transmission lines
-                cost_ = ((param_intertranscost["$r"]+param_intertranscost["$rr"])/2)  * variables["INVTRAN"][join((r,rr,t,trtype),"_")] * param_distance["$(r)_$(rr)"];
+                cost_ = ((param_intertranscost["$r"]+param_intertranscost["$rr"])/2)  * variables["INVTRAN"][join((r,rr,trtype,t),"_")] * param_distance["$(r)_$(rr)"];
                 JuMP.add_to_expression!(cost_func,cost_);
             end
         end
         if haskey(dict_routes,join((r,rr,"DC",t),"_")) & t >2020 & (param_INr["$r"] != param_INr["$rr"] ) # cost of back-to-back AC-DC-AC interties
-            cost_ = Trans_Intercost*variables["INVTRAN"][join((r,rr,t,"DC"),"_")]
+            cost_ = Trans_Intercost*variables["INVTRAN"][join((r,rr,"DC",t),"_")]
             JuMP.add_to_expression!(cost_func,cost_);
         end
     end
@@ -138,7 +138,7 @@ for t in set_t
     end
     for r in set_rfeas, rr in set_rfeas, h in set_h, trtype in set_trtype 
          if  haskey(dict_routes,join((r,rr,trtype,t),"_"))
-            cost_ = (get(param_hurdle,"$(r)_$(rr)",0)*variables["FLOW"][join((r,rr,h,t,trtype),"_")]* param_hours["$h"])*cost_scale*param_pvf_onm[t] ;
+            cost_ = (get(param_hurdle,"$(r)_$(rr)",0)*variables["FLOW"][join((r,rr,h,trtype,t),"_")]* param_hours["$h"])*cost_scale*param_pvf_onm[t] ;
             JuMP.add_to_expression!(cost_func,cost_);
         end
     end
