@@ -1,54 +1,39 @@
 function concat_sets(set_a::Array{String,1},set_b::Union{Array{String},Array{Int64}})
-    len = length(set_a)*length(set_b);
-    str_set = Vector{String}(undef,len);
-    i = 1
+    str_set = Vector{String}();
     for a in set_a, b in set_b
-        str_set[i] = a*"_$(b)"
-        i += 1;
+        push!(str_set,a*"_$(b)")
     end
     return str_set
 end
 
 function concat_sets(set_a::Array{String},set_b::Array{String},set_c::Union{Array{String},Array{Int64}})
-    len = length(set_a)*length(set_b)*length(set_c);
-    str_set = Vector{String}(undef,len);
-    i = 1
+    str_set = Vector{String}();
     for a in set_a, b in set_b, c in set_c
-        str_set[i] = a*"_"*b*"_$(c)";
-        i += 1;
+        push!(str_set,a*"_"*b*"_$(c)")
     end
     return str_set
 end
 
 function concat_sets(set_a::Array{String},set_b::Array{String},set_c::Array{String},set_d::Union{Array{String},Array{Int64}})
-    len = length(set_a)*length(set_b)*length(set_c)*length(set_d);
-    str_set = Vector{String}(undef,len);
-    i =1 
+    str_set = Vector{String}();
     for a in set_a, b in set_b, c in set_c, d in set_d
-        str_set[i] = a*"_"*b*"_"*c*"_$(d)";
-        i+=1
+        push!(str_set,a*"_"*b*"_"*c*"_$(d)")
     end
     return str_set
 end
 
 function concat_sets(set_a::Array{String,1},set_b::Array{String,1},set_c::Array{String,1},set_d::Array{String,1},set_e::Union{Array{String,1},Array{Int64,1}})
-    len = length(set_a)*length(set_b)*length(set_c)*length(set_d)*length(set_e);
-    str_set = Vector{String}(undef,len);
-    i = 1
+    str_set = Vector{String}();
     for a in set_a, b in set_b, c in set_c, d in set_d, e in set_e
-        str_set[i] = a*"_"*b*"_"*c*"_"*d*"_$(e)";
-        i += 1;
+        push!(str_set,a*"_"*b*"_"*c*"_"*d*"_$(e)")
     end
     return str_set
 end
 
 function concat_sets(set_a::Array{String},set_b::Array{String},set_c::Array{String},set_d::Array{String},set_e::Array{String},set_f::Union{Array{String},Array{Int64}})
-    len = length(set_a)*length(set_b)*length(set_c)*length(set_d)*length(set_e)*length(set_f);
-    str_set = Vector{String}(undef,len);
-    i =1;
+    str_set = Vector{String}();
     for a in set_a, b in set_b, c in set_c, d in set_d, e in set_e, f in set_f
-        str_set = a*"_"*b*"_"*c*"_"*d*"_"*e*"_$(f)";
-        i +=1;
+        push!(str_set,a*"_"*b*"_"*c*"_"*d*"_"*e*"_$(f)")
     end
     return str_set
 end
@@ -60,6 +45,7 @@ function var_const(m,var_name,names)
     for (nam,v) in zip(names,var)
         nam="$(var_name)_"*nam;
         MOI.set(JuMP.backend(m), MOI.VariableName(), v, nam)
+        MOI.add_constraint(JuMP.backend(m), MOI.SingleVariable(v),MOI.GreaterThan(0.0))
     end
     var_ref = VariableRef[VariableRef(m, v) for v in MOI.VectorOfVariables(var).variables];
     cont =  JuMP.Containers.DenseAxisArray(var_ref, names);
