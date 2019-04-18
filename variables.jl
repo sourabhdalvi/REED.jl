@@ -1,69 +1,58 @@
-function concat_set_2D(set_a,set_b)
+function concat_sets(set_a::Array{String,1},set_b::Union{Array{String},Array{Int64}})
     len = length(set_a)*length(set_b);
     str_set = Vector{String}(undef,len);
+    i = 1
     for a in set_a, b in set_b
-        push!(str_set,a*"_$(b)")
+        str_set[i] = a*"_$(b)"
+        i += 1;
     end
     return str_set
 end
 
-function concat_set_3D(set_a,set_b,set_c)
+function concat_sets(set_a::Array{String},set_b::Array{String},set_c::Union{Array{String},Array{Int64}})
     len = length(set_a)*length(set_b)*length(set_c);
     str_set = Vector{String}(undef,len);
+    i = 1
     for a in set_a, b in set_b, c in set_c
-        push!(str_set,a*"_"*b*"_$(c)")
+        str_set[i] = a*"_"*b*"_$(c)";
+        i += 1;
     end
     return str_set
 end
 
-function concat_set_4D(set_a,set_b,set_c,set_d)
+function concat_sets(set_a::Array{String},set_b::Array{String},set_c::Array{String},set_d::Union{Array{String},Array{Int64}})
     len = length(set_a)*length(set_b)*length(set_c)*length(set_d);
     str_set = Vector{String}(undef,len);
+    i =1 
     for a in set_a, b in set_b, c in set_c, d in set_d
-        push!(str_set,a*"_"*b*"_"*c*"_$(d)")
+        str_set[i] = a*"_"*b*"_"*c*"_$(d)";
+        i+=1
     end
     return str_set
 end
 
-function concat_set_5D(set_a,set_b,set_c,set_d,set_e)
+function concat_sets(set_a::Array{String,1},set_b::Array{String,1},set_c::Array{String,1},set_d::Array{String,1},set_e::Union{Array{String,1},Array{Int64,1}})
     len = length(set_a)*length(set_b)*length(set_c)*length(set_d)*length(set_e);
     str_set = Vector{String}(undef,len);
     i = 1
     for a in set_a, b in set_b, c in set_c, d in set_d, e in set_e
-        str_set[1] = a*"_"*b*"_"*c*"_"*d*"_$(e)";
-        i =+ 1;
+        str_set[i] = a*"_"*b*"_"*c*"_"*d*"_$(e)";
+        i += 1;
     end
     return str_set
 end
 
-function concat_set_6D(set_a,set_b,set_c,set_d,set_e,set_f)
+function concat_sets(set_a::Array{String},set_b::Array{String},set_c::Array{String},set_d::Array{String},set_e::Array{String},set_f::Union{Array{String},Array{Int64}})
     len = length(set_a)*length(set_b)*length(set_c)*length(set_d)*length(set_e)*length(set_f);
     str_set = Vector{String}(undef,len);
+    i =1;
     for a in set_a, b in set_b, c in set_c, d in set_d, e in set_e, f in set_f
-        push!(str_set,a*"_"*b*"_"*c*"_"*d*"_"*e*"_$(f)")
+        str_set = a*"_"*b*"_"*c*"_"*d*"_"*e*"_$(f)";
+        i +=1;
     end
     return str_set
 end
 
-function concat_sets(axs...)
-    len = length((axs));
-    if len == 1
-        str_set = axs
-    elseif len == 2 
-        str_set = concat_set_2D(axs...)
-    elseif len == 3
-        str_set = concat_set_3D(axs...)
-    elseif len == 4
-        str_set = concat_set_4D(axs...)
-    elseif len == 5 
-        str_set = concat_set_5D(axs...)  
-    elseif len == 6
-        str_set = concat_set_6D(axs...)
-    else
-        println("Function not setup for more than 6 sets")
-    end
-    return str_set
-end
     
 function var_const(m,var_name,names)
     size = length(names); 
