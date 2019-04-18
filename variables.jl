@@ -1,5 +1,6 @@
 function concat_set_2D(set_a,set_b)
-    str_set = Vector{String}();
+    len = length(set_a)*length(set_b);
+    str_set = Vector{String}(undef,len);
     for a in set_a, b in set_b
         push!(str_set,a*"_$(b)")
     end
@@ -7,7 +8,8 @@ function concat_set_2D(set_a,set_b)
 end
 
 function concat_set_3D(set_a,set_b,set_c)
-    str_set = Vector{String}();
+    len = length(set_a)*length(set_b)*length(set_c);
+    str_set = Vector{String}(undef,len);
     for a in set_a, b in set_b, c in set_c
         push!(str_set,a*"_"*b*"_$(c)")
     end
@@ -15,7 +17,8 @@ function concat_set_3D(set_a,set_b,set_c)
 end
 
 function concat_set_4D(set_a,set_b,set_c,set_d)
-    str_set = Vector{String}();
+    len = length(set_a)*length(set_b)*length(set_c)*length(set_d);
+    str_set = Vector{String}(undef,len);
     for a in set_a, b in set_b, c in set_c, d in set_d
         push!(str_set,a*"_"*b*"_"*c*"_$(d)")
     end
@@ -23,15 +26,19 @@ function concat_set_4D(set_a,set_b,set_c,set_d)
 end
 
 function concat_set_5D(set_a,set_b,set_c,set_d,set_e)
-    str_set = Vector{String}();
+    len = length(set_a)*length(set_b)*length(set_c)*length(set_d)*length(set_e);
+    str_set = Vector{String}(undef,len);
+    i = 1
     for a in set_a, b in set_b, c in set_c, d in set_d, e in set_e
-        push!(str_set,a*"_"*b*"_"*c*"_"*d*"_$(e)")
+        str_set[1] = a*"_"*b*"_"*c*"_"*d*"_$(e)";
+        i =+ 1;
     end
     return str_set
 end
 
 function concat_set_6D(set_a,set_b,set_c,set_d,set_e,set_f)
-    str_set = Vector{String}();
+    len = length(set_a)*length(set_b)*length(set_c)*length(set_d)*length(set_e)*length(set_f);
+    str_set = Vector{String}(undef,len);
     for a in set_a, b in set_b, c in set_c, d in set_d, e in set_e, f in set_f
         push!(str_set,a*"_"*b*"_"*c*"_"*d*"_"*e*"_$(f)")
     end
@@ -39,19 +46,22 @@ function concat_set_6D(set_a,set_b,set_c,set_d,set_e,set_f)
 end
 
 function concat_sets(axs...)
-    len = length(prod);
+    len = length((axs));
     if len == 1
-        str_set = (axs...)
+        str_set = axs
     elseif len == 2 
         str_set = concat_set_2D(axs...)
     elseif len == 3
         str_set = concat_set_3D(axs...)
     elseif len == 4
         str_set = concat_set_4D(axs...)
-    elseif len == 6 
+    elseif len == 5 
         str_set = concat_set_5D(axs...)  
+    elseif len == 6
+        str_set = concat_set_6D(axs...)
     else
-    println("Function not setup for more than 6 sets")
+        println("Function not setup for more than 6 sets")
+    end
     return str_set
 end
     
