@@ -159,7 +159,7 @@ param_hurdle = collect_2D("../GDX_data/Param_hurdle.csv");
 param_emit_tax = collect_3D("../GDX_data/Param_emit_tax.csv");
 param_acp_price = collect_2D("../GDX_data/Param_acp_price.csv");
 
-set_t = [ t for t in set_t if t < 2021];
+set_t = [ t for t in set_t if (t < 2014) & (t%2 == 0) ];
 dict_valcap = collect_set_dict4D("../GDX_data/Set_valcap.csv");
 dict_retiretech = collect_set_dict4D("../GDX_data/Set_retiretech.csv");
 dict_inv_cond = collect_set_dict4D("../GDX_data/Set_inv_cond.csv");
