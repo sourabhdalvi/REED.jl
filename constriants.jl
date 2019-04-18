@@ -96,7 +96,7 @@ for i in set_i2, c in set_initc, r in set_rfeas, t in set_t
         
         valid_tt_1 = [tt for tt in (set_t) if (tt <= t) & haskey(dict_inv_cond,"$(i)_$(c)_$(t)_$(tt)") & haskey(dict_valcap,"$(i)_$(c)_$(r)_$(t)") ];
         valid_tt_2 = [tt for tt in (set_t) if (tt <= t) & (t-tt < param_maxage[i]) & haskey(dict_ict,"$(i)_$(c)_$(t)") ];
-        
+
         constraints["$(cons_name)"][join((i,c,r,t),'_')] = JuMP.@constraint(model, 
             #LHS
             variables["CAP"][join((i,c,r,t),'_')]
@@ -772,7 +772,7 @@ end
 # -----------------------------------------------------------------------
 
 cons_name = "eq_transmission_limit"
-constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef,concat_sets(set_rfeas,set_rfeas,set_h,set_t,set_trtype));
+constraints["$(cons_name)"] = JuMP.Containers.DenseAxisArray{JuMP.ConstraintRef}(undef,concat_sets(set_rfeas,set_rfeas,set_h,set_trtype,set_t));
 
 
 for r in (set_rfeas), rr in (set_rfeas), h in (set_h), t in (set_t), trtype in (set_trtype)
@@ -781,7 +781,7 @@ for r in (set_rfeas), rr in (set_rfeas), h in (set_h), t in (set_t), trtype in (
         val_sum_1 = [ortype for ortype in (set_ortype) if (trtype =="AC") & haskey(dict_opres_routes,"$(r)_$(rr)_$(t)") ];
         
         rhs_1 = !isempty(val_sum_1) ? sum( [ variables["OPRES_FLOW"][join((ortype,r,rr,h,t),"_")] for ortype in val_sum_1 ]) : 0 ;
-        constraints["$(cons_name)"][join((r,rr,h,t,trtype),"_")] = JuMP.@constraint(model,  
+        constraints["$(cons_name)"][join((r,rr,h,trtype,t),"_")] = JuMP.@constraint(model,  
             variables["CAPTRAN"][join((r,rr,trtype,t),"_")]
             >=
             variables["FLOW"][join((r,rr,h,trtype,t),"_")]
