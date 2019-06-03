@@ -39,15 +39,11 @@ function collect_4D(file_path)
     param = DataFrames.dropmissing(CSV.read(file_path,header=0), disallowmissing=true);
     pdict = Dict()
     nrow,ncol = size(param)
-    if ncol == 5
-        for row in 1:nrow
-            a = param[row,1];b = param[row,2];c = param[row,3];d = param[row,4];
-            pdict["$a"*"_"*"$b"*"_"*"$c"*"_"*"$d"] = param[row,5] ;
-        end
-        return pdict
-    else
-        print("DataFrame doesn't have 5 columns")
+    for row in 1:nrow
+        a = param[row,1];b = param[row,2];c = param[row,3];d = param[row,4];
+        pdict["$a"*"_"*"$b"*"_"*"$c"*"_"*"$d"] = param[row,5] ;
     end
+    return pdict
 end
 
 function collect_5D(file_path)
@@ -148,3 +144,75 @@ function collect_set_dict2D(file_path)
     end
     return dict_
 end
+    
+function concat_sets(set_a::Array{String,1},set_b::Union{Array{String},Array{Int64}})
+    str_set = Vector{String}();
+    for a in set_a, b in set_b
+        push!(str_set,a*"_$(b)")
+    end
+    return str_set
+end
+
+function concat_sets(set_a::Array{String},set_b::Array{String},set_c::Union{Array{String},Array{Int64}})
+    str_set = Vector{String}();
+    for a in set_a, b in set_b, c in set_c
+        push!(str_set,a*"_"*b*"_$(c)")
+    end
+    return str_set
+end
+
+function concat_sets(set_a::Array{String},set_b::Array{String},set_c::Array{String},set_d::Union{Array{String},Array{Int64}})
+    str_set = Vector{String}();
+    for a in set_a, b in set_b, c in set_c, d in set_d
+        push!(str_set,a*"_"*b*"_"*c*"_$(d)")
+    end
+    return str_set
+end
+
+function concat_sets(set_a::Array{String,1},set_b::Array{String,1},set_c::Array{String,1},set_d::Array{String,1},set_e::Union{Array{String,1},Array{Int64,1}})
+    str_set = Vector{String}();
+    for a in set_a, b in set_b, c in set_c, d in set_d, e in set_e
+        push!(str_set,a*"_"*b*"_"*c*"_"*d*"_$(e)")
+    end
+    return str_set
+end
+
+function concat_sets(set_a::Array{String},set_b::Array{String},set_c::Array{String},set_d::Array{String},set_e::Array{String},set_f::Union{Array{String},Array{Int64}})
+    str_set = Vector{String}();
+    for a in set_a, b in set_b, c in set_c, d in set_d, e in set_e, f in set_f
+        push!(str_set,a*"_"*b*"_"*c*"_"*d*"_"*e*"_$(f)")
+    end
+    return str_set
+end
+    
+function var_const(m,var_name,names)
+    size = length(names); 
+    var = MOI.add_variables(JuMP.backend(m),size);
+    for (nam,v) in zip(names,var)
+        nam="$(var_name)_"*nam;
+        MOI.set(JuMP.backend(m), MOI.VariableName(), v, nam)
+        MOI.add_constraint(JuMP.backend(m), MOI.SingleVariable(v),MOI.GreaterThan(0.0))
+    end
+    var_ref = VariableRef[VariableRef(m, v) for v in MOI.VectorOfVariables(var).variables];
+    cont =  JuMP.Containers.DenseAxisArray(var_ref, names);
+    return cont
+    println("Variable = $(var_name) add to the JuMP model")
+end
+
+#=
+@benchmark var_const(m,:CAP,a) 
+
+BenchmarkTools.Trial: 
+  memory estimate:  31.78 MiB
+  allocs estimate:  855520
+  --------------
+  minimum time:     98.758 ms (11.21% GC)
+  median time:      116.127 ms (22.46% GC)
+  mean time:        265.604 ms (8.72% GC)
+  maximum time:     2.398 s (1.72% GC)
+  --------------
+  samples:          19
+  evals/sample:     1
+
+=#
+
