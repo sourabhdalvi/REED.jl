@@ -1,5 +1,5 @@
 ## Sets
-set_t = read_set("../GDX_data/Set_t.csv");
+set_t = read_set("../GDX_data/Set_tmodel.csv");
 set_c = read_set("../GDX_data/Set_C.csv");
 set_i = read_set("../GDX_data/Set_i.csv");
 set_r = read_set("../GDX_data/Set_r.csv");
@@ -12,7 +12,7 @@ set_initc = read_set("../GDX_data/Set_initc.csv");
 set_yeart = read_set("../GDX_data/Set_yeart.csv");
 set_retireyear = read_set("../GDX_data/Set_retireyear.csv");
 set_pcat = read_set("../GDX_data/Set_pcat.csv");
-set_r_ercot = read_set("../GDX_data/Set_r_ercot.csv");
+set_r_ercot = read_set("../GDX_data/Set_r_ercot.csv"); 
 set_rs = read_set("../GDX_data/Set_rs.csv");
 set_retireyear = read_set("../GDX_data/Set_retireyear.csv");
 set_refurbtech = read_set("../GDX_data/Set_refurbtech.csv");
@@ -28,13 +28,14 @@ set_rto = read_set("../GDX_data/Set_rto.csv");
 set_csp1 = read_set("../GDX_data/Set_csp1.csv");
 set_csp2 = read_set("../GDX_data/Set_csp2.csv");
 set_hydro_d = read_set("../GDX_data/Set_hydro_d.csv");
+set_hydro = read_set("../GDX_data/Set_hydro.csv");
 set_ofswind = read_set("../GDX_data/Set_ofswind.csv");
 set_ban_i = Set(["ice","hydro","mhkwave","upv_10","caes","other","unknown" ]);
 set_bannew_i = Set(["can-imports", "hydro", "distpv", "lfill-gas", "geothermal", "Ocean", 
                     "cofireold", "caes", "coal-IGCC", "CoalOldScr", "CoalOldUns", "biopower", 
                     "csp-ns", "HydEND", "HydED" ]);
 
-set_valcap = read_set_4D("../GDX_data/Set_valcap.csv");
+# set_valcap = read_set_4D("../GDX_data/Set_valcap.csv");
 set_force_pcat = read_set_2D("../GDX_data/Set_force_pcat.csv");
 set_ict =  read_set_3D("../GDX_data/Set_ict.csv");
 set_prescriptivelink = read_set_2D("../GDX_data/Set_prescriptivelink.csv");
@@ -57,7 +58,7 @@ set_AB32_r = read_set("../GDX_data/Set_AB32_r.csv");
 set_cofire = read_set("../GDX_data/Set_cofire.csv");
 set_RPSCat = read_set("../GDX_data/Set_RPSCat.csv");
 set_st = read_set("../GDX_data/Set_st.csv");
-set_r_st = read_set("../GDX_data/Set_r_st.csv");
+set_r_st = read_set_2D("../GDX_data/Set_r_st.csv");
 set_re = read_set("../GDX_data/Set_re.csv");
 set_cendiv = read_set("../GDX_data/Set_cendiv.csv");
 set_gb = read_set("../GDX_data/Set_gb.csv");
@@ -83,9 +84,14 @@ set_storage_no_csp = read_set("../GDX_data/Set_storage_no_csp.csv");
 set_stfeas = read_set("../GDX_data/Set_stfeas.csv");
 set_cdfeas = read_set("../GDX_data/Set_cdfeas.csv");
 set_thermal_storage = read_set("../GDX_data/Set_thermal_storage.csv");
-set_i2 = [i for i in set_i if !in(i,set_ban_i)];
+set_i2 = set_i #[i for i in set_i if !in(i,set_ban_i)];
 set_nexth = read_set_2D("../GDX_data/Set_nexth.csv");
 set_cf_tech = read_set("../GDX_data/Parm_cf_tech.csv");
+set_geo_undisc = read_set("../GDX_data/Set_geo_undisc.csv");
+set_onswind = read_set("../GDX_data/Set_onswind.csv");
+set_emit_rate_con =read_set_3D("../GDX_data/Set_emit_rate_con.csv")
+
+
 # Param
 param_exo_cap = collect_4D("../GDX_data/Parm_m_capacity_exog.csv");
 param_degrade = collect_3D("../GDX_data/Parm_degrade.csv");
@@ -96,6 +102,7 @@ param_firstyear_pcat = collect_1D("../GDX_data/Param_firstyear_pcat.csv");
 param_near_term_cap_limits = collect_3D("../GDX_data/Param_near_term_cap_limits.csv");
 param_m_avail_retire_exog_rsc = collect_4D("../GDX_data/Param_m_avail_retire_exog_rsc.csv");
 param_growth_limit_relative = collect_1D("../GDX_data/Param_growth_limit_relative.csv");
+param_growth_limit_absolute = collect_1D("../GDX_data/Param_growth_limit_absolute.csv");
 param_reserve_frac = collect_2D("../GDX_data/Parm_reserve_frac.csv");
 param_m_cf = collect_5D("../GDX_data/Set_m_cf.csv");
 param_minloadfrac = collect_3D("../GDX_data/Parm_minloadfrac.csv");
@@ -106,7 +113,7 @@ param_tranloss= collect_2D("../GDX_data/Parm_tranloss.csv");
 param_inertia_req = collect_1D("../GDX_data/Param_inertia_req.csv");
 param_m_rsc_dat = collect_4D("../GDX_data/Param_m_rsc_dat.csv");
 param_resourcescaler = collect_1D("../GDX_data/Param_resourcescaler.csv");
-param_m_cv_mar = collect_4D("../GDX_data/Param_m_cv_mar.csv");
+param_m_cc_mar = collect_4D("../GDX_data/Param_m_cc_mar.csv");
 param_futuretran = collect_5D("../GDX_data/Param_futuretran.csv");
 param_INr = collect_1D("../GDX_data/Param_INr.csv");
 param_trancap_exog =collect_4D("../GDX_data/Param_trancap_exog.csv");
@@ -116,9 +123,8 @@ param_trancost = collect_3D("../GDX_data/Param_cf_hyd_szn_adj.csv");
 param_emit_rate = collect_5D("../GDX_data/Param_emit_rate.csv");
 param_emit_cap = collect_2D("../GDX_data/Param_emit_cap.csv");
 param_AB32Cap = collect_1D("../GDX_data/Param_AB32Cap.csv");
-param_batterymandate = collect_3D("../GDX_data/Param_batterymandate.csv");
 param_emit_rate_limit = collect_3D("../GDX_data/Param_emit_rate_limit.csv");
-aram_offshore_cap_req = collect_2D("../GDX_data/Param_offshore_cap_req.csv");
+param_offshore_cap_req = collect_2D("../GDX_data/Param_offshore_cap_req.csv");
 param_national_rps_frac = collect_1D("../GDX_data/Param_national_rps_frac.csv");
 param_heat_rate = collect_4D("../GDX_data/Param_heat_rate.csv");
 param_gaslimit = collect_3D("../GDX_data/Param_gaslimit.csv");
@@ -128,9 +134,10 @@ param_gasbinwidth_national = collect_2D("../GDX_data/Param_Gasbinwidth_national.
 param_biosupply = collect_3D("../GDX_data/Param_biosupply.csv");
 param_csp_sm = collect_1D("../GDX_data/Param_CSP_SM.csv");
 param_numdays = collect_1D("../GDX_data/Param_numdays.csv");
-param_storage_eff = collect_set_dict2D("../GDX_data/Param_storage_eff.csv");
+param_storage_eff = collect_2D("../GDX_data/Param_storage_eff.csv");
+param_hours_daily = collect_1D("../GDX_data/Param_hours_daily.csv");
 param_storage_duration = collect_1D("../GDX_data/Param_storage_duration.csv");
-param_m_rscfeas = collect_3D("../GDX_data/Param_m_rscfeas.csv");
+set_m_rscfeas = collect_set_dict3D("../GDX_data/Set_m_rscfeas.csv");
 param_can_exports_h = collect_3D("../GDX_data/Param_can_exports_h.csv");
 param_load_exog= collect_3D("../GDX_data/Param_load_exog.csv");
 param_peakdem = collect_3D("../GDX_data/Param_peakdem.csv");
@@ -140,8 +147,15 @@ param_cfhist_hyd = collect_4D("../GDX_data/Param_cfhist_hyd.csv");
 param_cf_hyd_szn_adj = collect_3D("../GDX_data/Param_cf_hyd_szn_adj.csv");
 param_cf_hyd = collect_3D("../GDX_data/Param_cf_hyd.csv");
 param_yearweight = collect_1D("../GDX_data/Param_yearweight.csv");
-
-
+param_geo_discovery = collect_1D("../GDX_data/Param_geo_discovery.csv");
+param_cc_int = collect_5D("../GDX_data/Param_cc_int.csv");
+param_cc_excess = collect_4D("../GDX_data/Param_cc_excess.csv");
+param_cf_hyd = collect_3D("../GDX_data/Param_cf_hyd.csv");
+param_rsc_fin_mult = collect_3D("../GDX_data/Param_rsc_fin_mult.csv");
+param_RPS_StartYear = collect_const("../GDX_data/Param_RPS_StartYear.csv");
+param_batterymandate = collect_3D("../GDX_data/Param_batterymandate.csv");
+param_RPS_unbundled_limit = collect_1D("../GDX_data/Param_RPS_unbundled_limit.csv");
+# param_cc_old =collect
 #Cost
 param_pvf_capital = collect_1D("../GDX_data/Param_pvf_capital.csv");
 param_cost_cap_fin_mult = collect_3D("../GDX_data/Param_cost_cap_fin_mult.csv");
@@ -169,9 +183,23 @@ param_hurdle = collect_2D("../GDX_data/Param_hurdle.csv");
 param_emit_tax = collect_3D("../GDX_data/Param_emit_tax.csv");
 param_acp_price = collect_2D("../GDX_data/Param_acp_price.csv");
 param_RPSTechMult = collect_2D("../GDX_data/Param_RPSTechMult.csv");
+param_pvf_policy = collect_4D("../GDX_data/Param_pvf_policy.csv");
+param_gen_pol = collect_4D("../GDX_data/Param_gen_pol.csv");
+param_RGGI_start_yr = collect_const("../GDX_data/Param_RGGI_start_yr.csv");
+param_AB32_start_yr = collect_const("../GDX_data/Param_AB32_start_yr.csv");
+param_CarbPolicyStartyear = collect_const("../GDX_data/Param_CarbPolicyStartyear.csv");
+param_RecPerc = collect_3D("../GDX_data/Param_RecPerc.csv");
+
+param_curt_excess = collect_3D("../GDX_data/Param_curt_excess.csv");
+param_surpold= collect_3D("../GDX_data/Param_surpold.csv");
+param_curt_storage= collect_4D("../GDX_data/Param_curt_storage.csv");
+param_curt_mingen= collect_3D("../GDX_data/Param_curt_mingen.csv");
+param_curt_marg= collect_4D("../GDX_data/Param_curt_marg.csv");
+param_curt_int= collect_4D("../GDX_data/Param_curt_int.csv");
+param_cc_old= collect_4D("../GDX_data/Param_cc_old.csv");
 
 
-set_t = [ t for t in set_t if (t < 2012) & (t%2 == 0) ];
+# set_t = [ t for t in set_t if (t < 2012) ];
 dict_valcap = collect_set_dict4D("../GDX_data/Set_valcap.csv");
 dict_valgen = collect_set_dict4D("../GDX_data/Set_valgen.csv");
 dict_retiretech = collect_set_dict4D("../GDX_data/Set_retiretech.csv");
@@ -185,6 +213,5 @@ dict_maxload_szn = collect_set_dict4D("../GDX_data/Set_maxload_szn.csv");
 dict_RecMap = collect_set_dict5D("../GDX_data/Param_RecMap.csv");
 dict_RecTech = collect_set_dict4D("../GDX_data/Param_RecTech.csv");
 dict_RecStates = collect_set_dict3D("../GDX_data/Param_RecStates.csv");
-dict_RecPerc = collect_set_dict3D("../GDX_data/Param_RecPerc.csv");
-dict_pvf_policy = collect_set_dict4D("../GDX_data/Param_pvf_policy.csv");
-dict_gen_pol = collect_set_dict4D("../GDX_data/Param_gen_pol.csv");
+
+dict_valcap_irt = collect_set_dict3D("../GDX_data/Set_valcap_irt.csv");
