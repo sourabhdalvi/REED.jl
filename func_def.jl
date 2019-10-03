@@ -1,154 +1,215 @@
 function collect_const(file_path)
-    param = DataFrames.dropmissing(CSV.read(file_path,header=0), disallowmissing=true);
-    pdict = param[1,1]
-    return pdict
+    try
+        param = DataFrames.dropmissing(CSV.read(file_path,header=0), disallowmissing=true);
+        pdict = param[1,1]
+        return pdict
+    catch
+        return 0.0
 end
 
 function collect_1D(file_path)
-    param = DataFrames.dropmissing(CSV.read(file_path,header=0), disallowmissing=true);
-    pdict = Dict{Union{Number, String},Number}();
-    nrow,ncol = size(param)
-    for row in 1:nrow
-        pdict[param[row,1]] = param[row,2] ;
+    try
+        param = DataFrames.dropmissing(CSV.read(file_path,header=0), disallowmissing=true);
+        pdict = Dict{Union{Number, String},Number}();
+        nrow,ncol = size(param)
+        for row in 1:nrow
+            pdict[param[row,1]] = param[row,2] ;
+        end
+        return pdict
+    catch
+        return Dict{Union{Number, String},Number}();
     end
-    return pdict
+    
 end
 
 function collect_2D(file_path)
-    param = DataFrames.dropmissing(CSV.read(file_path,header=0), disallowmissing=true);
-    pdict = Dict{NTuple{2,Union{Number, String}},Number}();
-    nrow,ncol = size(param)
-    for row in 1:nrow
-        a =param[row,1];b = param[row,2];
-        pdict[(a,b)] = param[row,3] ;
+    try
+        param = DataFrames.dropmissing(CSV.read(file_path,header=0), disallowmissing=true);
+        pdict = Dict{NTuple{2,Union{Number, String}},Number}();
+        nrow,ncol = size(param)
+        for row in 1:nrow
+            a =param[row,1];b = param[row,2];
+            pdict[(a,b)] = param[row,3] ;
+        end
+        return pdict
+    catch
+        return Dict{NTuple{2,Union{Number, String}},Number}();
     end
-    return pdict
+    
 end
 
 function collect_3D(file_path)
-    param = DataFrames.dropmissing(CSV.read(file_path,header=0), disallowmissing=true);
-    pdict = Dict{NTuple{3,Union{Number, String}},Number}();
-    nrow,ncol = size(param)
-    for row in 1:nrow
-        a =param[row,1];b = param[row,2];c = param[row,3];
-        pdict[(a,b,c)] = param[row,4] ;
+    try
+        param = DataFrames.dropmissing(CSV.read(file_path,header=0), disallowmissing=true);
+        pdict = Dict{NTuple{3,Union{Number, String}},Number}();
+        nrow,ncol = size(param)
+        for row in 1:nrow
+            a =param[row,1];b = param[row,2];c = param[row,3];
+            pdict[(a,b,c)] = param[row,4] ;
+        end
+        return pdict
+    catch
+        return Dict{NTuple{3,Union{Number, String}},Number}();
     end
-    return pdict
 end
 
 function collect_4D(file_path)
-    param = DataFrames.dropmissing(CSV.read(file_path,header=0), disallowmissing=true);
-    pdict = Dict{NTuple{4,Union{Number, String}},Number}();
-    nrow,ncol = size(param)
-    for row in 1:nrow
-        a = param[row,1];b = param[row,2];c = param[row,3];d = param[row,4];
-        pdict[(a,b,c,d)] = param[row,5] ;
+    try
+        param = DataFrames.dropmissing(CSV.read(file_path,header=0), disallowmissing=true);
+        pdict = Dict{NTuple{4,Union{Number, String}},Number}();
+        nrow,ncol = size(param)
+        for row in 1:nrow
+            a = param[row,1];b = param[row,2];c = param[row,3];d = param[row,4];
+            pdict[(a,b,c,d)] = param[row,5] ;
+        end
+        return pdict
+    catch
+        return Dict{NTuple{4,Union{Number, String}},Number}();
     end
-    return pdict
 end
 
 function collect_5D(file_path)
-    param = DataFrames.dropmissing(CSV.read(file_path,header=0), disallowmissing=true);
-    pdict = Dict{NTuple{5,Union{Number, String}},Number}();
-    nrow,ncol = size(param)
-    for row in 1:nrow
-        a = param[row,1];b = param[row,2];c = param[row,3];d = param[row,4];e = param[row,5];
-        pdict[(a,b,c,d,e)] = param[row,6] ;
+    try
+        param = DataFrames.dropmissing(CSV.read(file_path,header=0), disallowmissing=true);
+        pdict = Dict{NTuple{5,Union{Number, String}},Number}();
+        nrow,ncol = size(param)
+        for row in 1:nrow
+            a = param[row,1];b = param[row,2];c = param[row,3];d = param[row,4];e = param[row,5];
+            pdict[(a,b,c,d,e)] = param[row,6] ;
+        end
+        return pdict
+    catch
+        return Dict{NTuple{5,Union{Number, String}},Number}();
     end
-    return pdict
 end
 
 function read_set(csv_path)
-    set_ = DataFrames.disallowmissing!(CSV.read(csv_path,header=0));
-    return collect(Set(set_.Column1))
+    try
+        set_ = DataFrames.disallowmissing!(CSV.read(csv_path,header=0));
+        return collect(Set(set_.Column1))
+    catch
+        return Array();
+    end
 end
 
 function read_set_2D(csv_path)
-    set = DataFrames.dropmissing(CSV.read(csv_path,header=0), disallowmissing=true);
-    slist =  Array{NTuple{2,Union{Number, String}},1}();
-    nrow,ncol = size(set)
-    for row in 1:nrow
-        i = (set[row,1],set[row,2]);
-        push!(slist,i);
+    try
+        set = DataFrames.dropmissing(CSV.read(csv_path,header=0), disallowmissing=true);
+        slist =  Array{NTuple{2,Union{Number, String}},1}();
+        nrow,ncol = size(set)
+        for row in 1:nrow
+            i = (set[row,1],set[row,2]);
+            push!(slist,i);
+        end
+        return collect(Set(slist))
+    catch
+        return Array{NTuple{2,Union{Number, String}},1}()
     end
-    return collect(Set(slist))
 end
 
 function read_set_3D(csv_path)
-    set = DataFrames.dropmissing(CSV.read(csv_path,header=0), disallowmissing=true);
-    slist = Array{NTuple{3,Union{Number, String}},1}();
-    nrow,ncol = size(set)
-    for row in 1:nrow
-        i = (set[row,1],set[row,2],set[row,3]);
-        push!(slist,i);
+    try
+        set = DataFrames.dropmissing(CSV.read(csv_path,header=0), disallowmissing=true);
+        slist = Array{NTuple{3,Union{Number, String}},1}();
+        nrow,ncol = size(set)
+        for row in 1:nrow
+            i = (set[row,1],set[row,2],set[row,3]);
+            push!(slist,i);
+        end
+        return collect(Set(slist))
+    catch
+        return Array{NTuple{3,Union{Number, String}},1}()
     end
-    return collect(Set(slist))
 end
 
 function read_set_4D(csv_path)
-    set = DataFrames.dropmissing(CSV.read(csv_path,header=0), disallowmissing=true);
-    slist =  Array{NTuple{4,Union{Number, String}},1}();
-    nrow,ncol = size(set)
-    for row in 1:nrow
-        i = (set[row,1],set[row,2],set[row,3],set[row,4]);
-        push!(slist,i);
+    try
+        set = DataFrames.dropmissing(CSV.read(csv_path,header=0), disallowmissing=true);
+        slist =  Array{NTuple{4,Union{Number, String}},1}();
+        nrow,ncol = size(set)
+        for row in 1:nrow
+            i = (set[row,1],set[row,2],set[row,3],set[row,4]);
+            push!(slist,i);
+        end
+        return collect(Set(slist))
+    catch
+        return Array{NTuple{4,Union{Number, String}},1}()
     end
-    return collect(Set(slist))
 end
 
 function read_set_5D(csv_path)
-    set = DataFrames.dropmissing(CSV.read(csv_path,header=0), disallowmissing=true);
-    slist =  Array{NTuple{5,Union{Number, String}},1}();
-    nrow,ncol = size(set)
-    for row in 1:nrow
-        i = (set[row,1],set[row,2],set[row,3],set[row,4],set[row,5]);
-        push!(slist,i);
+    try
+        set = DataFrames.dropmissing(CSV.read(csv_path,header=0), disallowmissing=true);
+        slist =  Array{NTuple{5,Union{Number, String}},1}();
+        nrow,ncol = size(set)
+        for row in 1:nrow
+            i = (set[row,1],set[row,2],set[row,3],set[row,4],set[row,5]);
+            push!(slist,i);
+        end
+        return collect(Set(slist))
+    catch
+        return Array{NTuple{5,Union{Number, String}},1}()
     end
-    return collect(Set(slist))
 end
 
 function collect_set_dict5D(file_path)
-    set_= DataFrames.dropmissing(CSV.read(file_path,header=0), disallowmissing=true);
-    dict_ = Dict{NTuple{5,Union{Number, String}},Bool}()
-    nrow,ncol = size(set_)
-    for row in 1:nrow
-        a = set_[row,1];b = set_[row,2];c = set_[row,3];d = set_[row,4];e = set_[row,5];
-        dict_[(a,b,c,d,e)] = true ;
+    try
+        set_= DataFrames.dropmissing(CSV.read(file_path,header=0), disallowmissing=true);
+        dict_ = Dict{NTuple{5,Union{Number, String}},Bool}()
+        nrow,ncol = size(set_)
+        for row in 1:nrow
+            a = set_[row,1];b = set_[row,2];c = set_[row,3];d = set_[row,4];e = set_[row,5];
+            dict_[(a,b,c,d,e)] = true ;
+        end
+        return dict_
+    catch
+        return Dict{NTuple{5,Union{Number, String}},Bool}()
     end
-    return dict_
 end
     
 function collect_set_dict4D(file_path)
-    set_= DataFrames.dropmissing(CSV.read(file_path,header=0), disallowmissing=true);
-    dict_ = Dict{NTuple{4,Union{Number, String}},Bool}()
-    nrow,ncol = size(set_)
-    for row in 1:nrow
-        a = set_[row,1];b = set_[row,2];c = set_[row,3];d = set_[row,4];
-        dict_[(a,b,c,d)] = true ;
+    try
+        set_= DataFrames.dropmissing(CSV.read(file_path,header=0), disallowmissing=true);
+        dict_ = Dict{NTuple{4,Union{Number, String}},Bool}()
+        nrow,ncol = size(set_)
+        for row in 1:nrow
+            a = set_[row,1];b = set_[row,2];c = set_[row,3];d = set_[row,4];
+            dict_[(a,b,c,d)] = true ;
+        end
+        return dict_
+    catch
+        return Dict{NTuple{4,Union{Number, String}},Bool}()
     end
-    return dict_
 end
 
 function collect_set_dict3D(file_path)
-    set_= DataFrames.dropmissing(CSV.read(file_path,header=0), disallowmissing=true);
-    dict_ = Dict{NTuple{3,Union{Number, String}},Bool}()
-    nrow,ncol = size(set_)
-    for row in 1:nrow
-        a = set_[row,1];b = set_[row,2];c = set_[row,3]
-        dict_[(a,b,c)] = true ;
+    try
+        set_= DataFrames.dropmissing(CSV.read(file_path,header=0), disallowmissing=true);
+        dict_ = Dict{NTuple{3,Union{Number, String}},Bool}()
+        nrow,ncol = size(set_)
+        for row in 1:nrow
+            a = set_[row,1];b = set_[row,2];c = set_[row,3]
+            dict_[(a,b,c)] = true ;
+        end
+        return dict_
+    catch
+        return Dict{NTuple{3,Union{Number, String}},Bool}()
     end
-    return dict_
 end
 
 function collect_set_dict2D(file_path)
-    set_= DataFrames.dropmissing(CSV.read(file_path,header=0), disallowmissing=true);
-    dict_ = Dict{NTuple{2,Union{Number, String}},Bool}()
-    nrow,ncol = size(set_)
-    for row in 1:nrow
-        a = set_[row,1];b = set_[row,2];
-        dict_[(a,b)] = true ;
+    try
+        set_= DataFrames.dropmissing(CSV.read(file_path,header=0), disallowmissing=true);
+        dict_ = Dict{NTuple{2,Union{Number, String}},Bool}()
+        nrow,ncol = size(set_)
+        for row in 1:nrow
+            a = set_[row,1];b = set_[row,2];
+            dict_[(a,b)] = true ;
+        end
+        return dict_
+    catch
+        return Dict{NTuple{2,Union{Number, String}},Bool}()
     end
-    return dict_
 end
 
 
@@ -244,3 +305,8 @@ Benchmark Different Add Variable Methods
 3). julia> @time add_variable_constraints(model,str_sets_dict["CAP"]);
         0.830946 seconds (1.62 M allocations: 98.212 MiB, 46.12% gc time)
 =#
+
+function _add_cons_container!(canonical_model::CanonicalModel, cons_name::Symbol, ax1)
+    canonical_model.constraints[cons_name] = JuMPConstraintArray(undef, ax1)
+    return
+end
