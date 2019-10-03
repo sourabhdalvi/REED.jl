@@ -12,7 +12,6 @@ using MathOptFormat
 
 @time include("./func_def.jl");
 @time include("./read_data.jl");
-@time include("./sets2json.jl");
 @time include("./Rcsv2json.jl");
 
 # cached = MOIU.CachingOptimizer(JuMP._MOIModel{Float64}(), optimizer)
@@ -25,7 +24,7 @@ constraints = Dict{String, JuMP.Containers.DenseAxisArray}();
 variables = Dict{String, JuMP.Containers.DenseAxisArray}();
 
 @time include("variables.jl");
-@time include("./constraints_3.jl");
+@time include("constriants.jl");
 @time include("Objective.jl");
 @time JuMP.@objective(model, Min, cost_func);
 
