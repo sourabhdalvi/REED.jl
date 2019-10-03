@@ -5,6 +5,7 @@ function collect_const(file_path)
         return pdict
     catch
         return 0.0
+    end
 end
 
 function collect_1D(file_path)
@@ -305,8 +306,3 @@ Benchmark Different Add Variable Methods
 3). julia> @time add_variable_constraints(model,str_sets_dict["CAP"]);
         0.830946 seconds (1.62 M allocations: 98.212 MiB, 46.12% gc time)
 =#
-
-function _add_cons_container!(canonical_model::CanonicalModel, cons_name::Symbol, ax1)
-    canonical_model.constraints[cons_name] = JuMPConstraintArray(undef, ax1)
-    return
-end
