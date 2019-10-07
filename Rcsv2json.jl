@@ -1,87 +1,106 @@
 function collect_2D(file_path)
-    param = DataFrames.dropmissing(CSV.read(file_path,header=0,types=[String,String,Float64]), disallowmissing=true);
-    pdict = Dict()
-    nrow,ncol = size(param)
-    for row in 1:nrow
-        a =param[row,1];b = parse(Int64,param[row,2]);
-        pdict[(a,b)] = param[row,3] ;
+    try
+        param = DataFrames.dropmissing(CSV.read(file_path,header=0,types=[String,String,Float64]), disallowmissing=true);
+        pdict = Dict()
+        nrow,ncol = size(param)
+        for row in 1:nrow
+            a =param[row,1];b = parse(Int64,param[row,2]);
+            pdict[(a,b)] = param[row,3] ;
+        end
+        return pdict
+    catch
+        return Dict()
     end
-    return pdict
 end
 
 function collect_3D(file_path)
-    param = DataFrames.dropmissing(CSV.read(file_path,header=0,types=[String,String,String,Float64]), disallowmissing=true);
-    pdict = Dict()
-    nrow,ncol = size(param)
-    for row in 1:nrow
-        a =param[row,1];b = param[row,2];c = parse(Int64,param[row,3]);
-        pdict[(a,b,c)] = param[row,4] ;
+    try
+        param = DataFrames.dropmissing(CSV.read(file_path,header=0,types=[String,String,String,Float64]), disallowmissing=true);
+        pdict = Dict()
+        nrow,ncol = size(param)
+        for row in 1:nrow
+            a =param[row,1];b = param[row,2];c = parse(Int64,param[row,3]);
+            pdict[(a,b,c)] = param[row,4] ;
+        end
+        return pdict
+    catch
+        return Dict()
     end
-    return pdict
 end
 
 function collect_4D(file_path)
-    param = DataFrames.dropmissing(CSV.read(file_path,header=0,types=[String,String,String,String,Float64]), disallowmissing=true,);
-    pdict = Dict()
-    nrow,ncol = size(param)
-    if ncol == 5
+    try
+        param = DataFrames.dropmissing(CSV.read(file_path,header=0,types=[String,String,String,String,Float64]), disallowmissing=true,);
+        pdict = Dict()
+        nrow,ncol = size(param)
         for row in 1:nrow
             a = param[row,1];b = param[row,2];c = param[row,3];d = parse(Int64,param[row,4]);
             pdict[(a,b,c,d)] = param[row,5] ;
         end
         return pdict
-    else
-        print("DataFrame doesn't have 5 columns")
+    catch
+        return Dict()
     end
 end
 
 function collect_4Df(file_path)
-    param = DataFrames.dropmissing(CSV.read(file_path,header=0,types=[String,String,String,String,Float64]), disallowmissing=true,);
-    pdict = Dict()
-    nrow,ncol = size(param)
-    if ncol == 5
+    try
+        param = DataFrames.dropmissing(CSV.read(file_path,header=0,types=[String,String,String,String,Float64]), disallowmissing=true,);
+        pdict = Dict()
+        nrow,ncol = size(param)
         for row in 1:nrow
             a = param[row,1];b = param[row,2];c = parse(Int64,param[row,3]);d = param[row,4];
             pdict[(a,b,c,d)] = param[row,5] ;
         end
         return pdict
-    else
-        print("DataFrame doesn't have 5 columns")
+    catch
+        return Dict()
     end
 end    
     
     
 function collect_5D(file_path)
-    param = DataFrames.dropmissing(CSV.read(file_path,header=0,types=[String,String,String,String,String,Float64]), disallowmissing=true);
-    pdict = Dict()
-    nrow,ncol = size(param)
-    for row in 1:nrow
-        a = param[row,1];b = param[row,2];c = param[row,3];d = param[row,4];e = parse(Int64,param[row,5]);
-        pdict[(a,b,c,d,e)] = param[row,6] ;
+    try
+        param = DataFrames.dropmissing(CSV.read(file_path,header=0,types=[String,String,String,String,String,Float64]), disallowmissing=true);
+        pdict = Dict()
+        nrow,ncol = size(param)
+        for row in 1:nrow
+            a = param[row,1];b = param[row,2];c = param[row,3];d = param[row,4];e = parse(Int64,param[row,5]);
+            pdict[(a,b,c,d,e)] = param[row,6] ;
+        end
+        return pdict
+    catch
+        return Dict()
     end
-    return pdict
 end
     
 function collect_5DF(file_path)
-    param = DataFrames.dropmissing(CSV.read(file_path,header=0,types=[String,String,String,String,String,Float64]), disallowmissing=true);
-    pdict = Dict()
-    nrow,ncol = size(param)
-    for row in 1:nrow
-        a = param[row,1];b = param[row,2];c = param[row,3];d = parse(Int64,param[row,4]);e = param[row,5];
-        pdict[(a,b,c,e,d)] = param[row,6] ;
+    try
+        param = DataFrames.dropmissing(CSV.read(file_path,header=0,types=[String,String,String,String,String,Float64]), disallowmissing=true);
+        pdict = Dict()
+        nrow,ncol = size(param)
+        for row in 1:nrow
+            a = param[row,1];b = param[row,2];c = param[row,3];d = parse(Int64,param[row,4]);e = param[row,5];
+            pdict[(a,b,c,e,d)] = param[row,6] ;
+        end
+        return pdict
+    catch
+        return Dict()
     end
-    return pdict
 end
     
 function collect_6D(file_path)
-    param = DataFrames.dropmissing(CSV.read(file_path,header=0,types=[String,String,String,String,String,String,Float64]), disallowmissing=true);
-    pdict = Dict()
-    nrow,ncol = size(param)
-    for row in 1:nrow
-        a = param[row,1];b = param[row,2];c = param[row,3];d = param[row,4];e = param[row,5];f =parse(Int64,param[row,6])
-        pdict[(a,b,c,d,e,f)] = param[row,7] ;
-    end
-    return pdict
+    try
+        param = DataFrames.dropmissing(CSV.read(file_path,header=0,types=[String,String,String,String,String,String,Float64]), disallowmissing=true);
+        pdict = Dict()
+        nrow,ncol = size(param)
+        for row in 1:nrow
+            a = param[row,1];b = param[row,2];c = param[row,3];d = param[row,4];e = param[row,5];f =parse(Int64,param[row,6])
+            pdict[(a,b,c,d,e,f)] = param[row,7] ;
+        end
+        return pdict
+    catch
+        return Dict()
 end
 
 
