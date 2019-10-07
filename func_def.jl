@@ -89,7 +89,7 @@ function read_set(csv_path)
         set_ = DataFrames.disallowmissing!(CSV.read(csv_path,header=0));
         return collect(Set(set_.Column1))
     catch
-        return Array();
+        return Array{Union{Number, String},1}();
     end
 end
 
