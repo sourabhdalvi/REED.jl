@@ -13,7 +13,7 @@ using MathOptFormat
 @time include("./func_def.jl");
 @time include("./read_data.jl");
 @time include("./Rcsv2json.jl");
-
+@time include("./set2json.jl");
 # cached = MOIU.CachingOptimizer(JuMP._MOIModel{Float64}(), optimizer)
 # optimizer = Xpress.Optimizer(OUTPUTLOG = 1,MIPTOL=1e-6,FEASTOL=1e-6);
 # model = direct_model(optimizer);

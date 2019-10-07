@@ -101,6 +101,7 @@ function collect_6D(file_path)
         return pdict
     catch
         return Dict()
+    end
 end
 
 
